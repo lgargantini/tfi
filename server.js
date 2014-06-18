@@ -17,8 +17,9 @@ io.on('connection', function (socket) {
 	socket
 	.on('message',function (msg) {
         console.log('recibi message');
-		console.log('got :'+msg+'\n');
-		socket.emit('pong');
+		console.log('got :');
+        console.log(msg);
+		socket.emit('message',{'msg': 'pong!'});
 	})
 	.on('Start',function (data) {
         //start uploading

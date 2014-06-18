@@ -9,6 +9,10 @@
   var sendBut;
   var lastMessage;
   //var clearLogBut;
+  var SelectedFile;
+  var socket;
+  var FReader;
+  var Name;
 
   function echoHandlePageLoad()
   {
@@ -25,29 +29,40 @@
     secureCb.checked = false;
     secureCb.onclick = toggleTls;
     secureCbLabel = document.getElementById("secureCbLabel")
-*/
-   wsUri = document.getElementById("wsUri");
+    */
+//TRIGGERS!!!
+
+wsUri = document.getElementById("wsUri");
  //   toggleTls();
-    connectBut = document.getElementById("connect");
-    connectBut.onclick = doConnect;
+ connectBut = document.getElementById("connect");
+ connectBut.onclick = doConnect;
 
-    disconnectBut = document.getElementById("disconnect");
-    disconnectBut.onclick = doDisconnect;
+ disconnectBut = document.getElementById("disconnect");
+ disconnectBut.onclick = doDisconnect;
 
-    sendMessage = document.getElementById('msg');
+ sendMessage = document.getElementById('msg');
 
-    sendBut = document.getElementById("send");
-    sendBut.onclick = doSend;
+ sendBut = document.getElementById("send");
+ sendBut.onclick = doSend;
 
-    consoleLog = document.getElementById("box");
+ consoleLog = document.getElementById("box");
 
    // clearLogBut = document.getElementById("clearLogBut");
    // clearLogBut.onclick = clearLog;
 
-    setGuiConnected(false);
+   setGuiConnected(false);
 
-    document.getElementById("disconnect").onclick = doDisconnect;
-    document.getElementById("send").onclick = doSend;
+   document.getElementById("disconnect").onclick = doDisconnect;
+   document.getElementById("send").onclick = doSend;
+
+     if(window.File && window.FileReader){ //These are the relevant HTML5 objects that we are going to use 
+      document.getElementById('UploadButton').addEventListener('click', StartUpload);  
+      document.getElementById('FileBox').addEventListener('change', FileChosen);
+    }
+    else
+    {
+      document.getElementById('UploadArea').innerHTML = "Your Browser Doesn't Support The File API Please Update Your Browser";
+    }
 
   }
 /*
@@ -66,45 +81,50 @@
       wsUri.value = wsUri.value.replace ("wss:", "ws:");
     }
   }
-*/
+  */
+
   function doConnect()
   {
     if (window.MozWebSocket)
     {
-        logToConsole('<span style="color: red;"><strong>Info:</strong> This browser supports WebSocket using the MozWebSocket constructor</span>');
-        window.WebSocket = window.MozWebSocket;
+      logToConsole('<span style="color: red;"><strong>Info:</strong> This browser supports WebSocket using the MozWebSocket constructor</span>');
+      window.WebSocket = window.MozWebSocket;
     }
     else if (!window.WebSocket)
     {
-        logToConsole('<span style="color: red;"><strong>Error:</strong> This browser does not have support for WebSocket</span>');
-        return;
+      logToConsole('<span style="color: red;"><strong>Error:</strong> This browser does not have support for WebSocket</span>');
+      return;
     }
 
     // prefer text messages
     var uri = wsUri.value;
     if (uri.indexOf("?") == -1) {
-        uri += "?encoding=text";
+      uri += "?encoding=text";
     } else {
-        uri += "&encoding=text";
+      uri += "&encoding=text";
     }
-    websocket = new WebSocket(uri);
-    websocket.onopen = function(evt) { onOpen(evt) };
-    websocket.onclose = function(evt) { onClose(evt) };
-    websocket.onmessage = function(evt) { onMessage(evt) };
-    websocket.onerror = function(evt) { onError(evt) };
+    socket = io.connect(uri);
+    onOpen();
+    socket.on('error', function (evt) { onError(evt);  });
+    socket.on('close', function (evt) { onClose(evt);  });
+    socket.on('message', function (data) { onMessage(data);  });
+    socket.on('Done', function (data){ onDone(data,uri); });
+    socket.on('MoreData', function  (data) { onMoreData(data); });
   }
-  
+
   function doDisconnect()
   {
-    websocket.close()
+    socket.close()
   }
-  
+
   function doSend()
   {
     logToConsole("SENT: " + sendMessage.value);
   // record the timestamp
-    lastMessage =+ +new Date;
-    websocket.send(sendMessage.value);
+  lastMessage =+ +new Date;
+  socket.emit('message', {'msg': sendMessage.value});
+  //socket.emit('Upload', { 'Name' : Name, Data : evnt.target.result });
+    //websocket.send(sendMessage.value);
   }
 
   function logToConsole(message)
@@ -121,7 +141,7 @@
     consoleLog.scrollTop = consoleLog.scrollHeight;
   }
   
-  function onOpen(evt)
+  function onOpen()
   {
     logToConsole("CONNECTED");
     setGuiConnected(true);
@@ -136,16 +156,27 @@
   function onMessage(evt)
   {
     console.log(evt);
-    logToConsole('<span style="color: blue;">RESPONSE: ' + evt.data+'</span>');
+    logToConsole('<span style="color: blue;">RESPONSE: ' + evt.msg+'</span>');
      // we got echo back, measure latency
      document.getElementById('latency').innerHTML = new Date - lastMessage;
-  }
+   }
 
-  function onError(evt)
-  {
+   function onError(evt)
+   {
     logToConsole('<span style="color: red;">ERROR:</span> ' + evt.data);
   }
-  
+  function onDone (data,Path) {
+    var Content = "Video Successfully Uploaded !!"
+    Content += "<img id='Thumb' src='" + Path + data['Image'] + "' alt='" + Name + "'><br>";
+    Content += "<button type='button' name='Upload' value='' id='Restart' class='Button'>Upload Another</button>";
+    document.getElementById('UploadArea').innerHTML = Content;
+    document.getElementById('Restart').addEventListener('click', Refresh);
+    document.getElementById('UploadBox').style.width = '270px';
+    document.getElementById('UploadBox').style.height = '270px';
+    document.getElementById('UploadBox').style.textAlign = 'center';
+    document.getElementById('Restart').style.left = '20px';
+    
+  }
   function setGuiConnected(isConnected)
   {
     wsUri.disabled = isConnected;
@@ -154,22 +185,20 @@
     sendMessage.disabled = !isConnected;
     sendBut.disabled = !isConnected;
   //  secureCb.disabled = isConnected;
-    var labelColor = "black";
-    if (isConnected)
-    {
-      labelColor = "#999999";
-    }
-   //  secureCbLabel.style.color = labelColor;
-    
+  var labelColor = "black";
+  if (isConnected)
+  {
+    labelColor = "#999999";
   }
-	
-	function clearLog()
-	{
-		while (consoleLog.childNodes.length > 0)
-		{
-			consoleLog.removeChild(consoleLog.lastChild);
-		}
-	}
+   //  secureCbLabel.style.color = labelColor;
+ }
+ function clearLog()
+ {
+  while (consoleLog.childNodes.length > 0)
+  {
+   consoleLog.removeChild(consoleLog.lastChild);
+ }
+}
 
 /*	function getSecureTag()
 	{
@@ -182,5 +211,61 @@
 			return '';
 		}
 	}
-*/
-  window.addEventListener("load", echoHandlePageLoad, false);
+  */
+  function FileChosen(evnt) {
+    SelectedFile = evnt.target.files[0];
+    document.getElementById('NameBox').value = SelectedFile.name;
+  }
+
+
+  function StartUpload(){
+    if(document.getElementById('FileBox').value != "")
+    {
+      FReader = new FileReader();
+      Name = document.getElementById('NameBox').value;
+      var Content = "<span id='NameArea'>Uploading " + SelectedFile.name + " as " + Name + "</span>";
+      Content += '<div id="ProgressContainer"><div id="ProgressBar"></div></div><span id="percent">0%</span>';
+      Content += "<span id='Uploaded'> - <span id='MB'>0</span>/" + Math.round(SelectedFile.size / 1048576) + "MB</span>";
+      document.getElementById('UploadArea').innerHTML = Content;
+      FReader.onload = function(evnt){
+        socket.emit('Upload', { 'Name' : Name, Data : evnt.target.result });
+      }
+      socket.emit('Start', { 'Name' : Name, 'Size' : SelectedFile.size });
+    }
+    else
+    {
+      alert("Please Select A File");
+    }
+  }
+
+
+
+  function onMoreData(data){
+    UpdateBar(data['Percent']);
+        var Place = data['Place'] * 524288; //The Next Blocks Starting Position
+        var NewFile; //The Variable that will hold the new Block of Data
+        if(SelectedFile.slice){
+          NewFile = SelectedFile.slice(Place, Place + Math.min(524288, (SelectedFile.size-Place)));
+        }else if (SelectedFile.webkitSlice){
+          NewFile = SelectedFile.webkitSlice(Place, Place + Math.min(524288, (SelectedFile.size-Place)));
+        }else if(SelectedFile.mozSlice){
+          NewFile = SelectedFile.mozSlice(Place, Place + Math.min(524288, (SelectedFile.size-Place)));
+        }else{
+          throw new Error("falla!!");
+        }
+        FReader.readAsBinaryString(NewFile);
+      }
+
+      function UpdateBar(percent){
+        document.getElementById('ProgressBar').style.width = percent + '%';
+        document.getElementById('percent').innerHTML = (Math.round(percent*100)/100) + '%';
+        var MBDone = Math.round(((percent/100.0) * SelectedFile.size) / 1048576);
+        document.getElementById('MB').innerHTML = MBDone;
+      }
+
+
+      function Refresh(){
+        location.reload(true);
+      }
+
+      window.addEventListener("load", echoHandlePageLoad, false);
