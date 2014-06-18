@@ -1,0 +1,36 @@
+<!--doctype html-->
+<html>
+  <head>
+    <title>WebSocket echo test</title>
+    <link rel="stylesheet" type="text/css" href="css/test.css">
+    </head>
+  <body>
+    <h1>WebSocket Test</h1>
+    <h2>Latency: <span id="latency"></span>ms</h2>
+
+    <div>
+    <strong>Location :</strong><br>
+      <input id='wsUri' placeholder='uri'><br>
+      <strong>Message :</strong><br>
+      <input type="text" id="msg" placeholder='message'><br>
+      <strong>Log :</strong><br>
+      <div id='box' style="border:4px solid black;width:300px;height:200px;overflow:scroll;" ></div><br>
+      <button id='connect' >Connect<br>
+      <button id='disconnect' >Disconnect<br>
+      <button id="send" >Send Msg!<br>
+    </div>
+    <div id="UploadBox">
+        <h2>Video Uploader</h2>
+        <span id='UploadArea'>
+            <label for="FileBox">Choose A File: </label><input type="file" id="FileBox"><br>
+            <label for="NameBox">Name: </label><input type="text" id="NameBox"><br>
+ 
+            <button  type='button' id='UploadButton' class='Button'>Upload</button>
+        </span>
+    </div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script type='text/javascript' src='test2.js'></script>
+
+    </body>
+</html>

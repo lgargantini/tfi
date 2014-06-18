@@ -1,0 +1,31 @@
+{
+  "name:": "ws-echo",
+  "version": "0.0.1",
+  "dependencies": {
+    "express": "3.x.x",
+    "socket.io": "*",
+    "util": "*"
+  },
+  "scripts": {
+    "start": "node server.js"
+  },
+  "name": "tfi-websocket",
+  "description": "tfi ===",
+  "main": "server.js",
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lgargantini/tfi.git"
+  },
+  "keywords": [
+    "websocket",
+    "nodejs",
+    "http"
+  ],
+  "author": "lgargantini",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/lgargantini/tfi/issues"
+  },
+  "homepage": "https://github.com/lgargantini/tfi"
+}
