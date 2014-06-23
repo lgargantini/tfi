@@ -107,31 +107,44 @@ wsUri = document.getElementById("wsUri");
     onOpen();
     socket.on('error', function (evt) { onError(evt);  });
     socket.on('close', function (evt) { onClose(evt);  });
-    socket.on('message', function (data) { onMessage(data);  });
+    socket.on('message', onMessage );
     socket.on('Done', function (data){ onDone(data,uri); });
     socket.on('MoreData', function  (data) { onMoreData(data); });
+    socket.on('announcement',function (msg) {
+      onAnnouncement(msg);
+    })
   }
 
   function doDisconnect()
   {
-    socket.close()
+    socket.disconnect();
   }
 
   function doSend()
   {
-    logToConsole("SENT: " + sendMessage.value);
+  var p = logToConsole("me: " + sendMessage.value);
   // record the timestamp
   lastMessage =+ +new Date;
-  socket.emit('message', {'msg': sendMessage.value});
-  //socket.emit('Upload', { 'Name' : Name, Data : evnt.target.result });
-    //websocket.send(sendMessage.value);
+  socket.emit('message', {'msg': sendMessage.value},function (date) {
+  p.className = 'bg-success';
+  p.title = date;
+  document.getElementById('latency').innerHTML = date - lastMessage;
+  });
+  sendMessage.value = '';
+  sendMessage.focus();
+  return false;
   }
 
   function logToConsole(message)
   {
-    var pre = document.createElement("p");
-    pre.innerHTML = message;
-    consoleLog.appendChild(pre);
+    var tr = document.createElement('tr');
+    var td = document.createElement("td");
+    var p = document.createElement('p');
+    p.innerHTML = message;
+    consoleLog.appendChild(tr);
+    tr.appendChild(td);
+    td.appendChild(p);
+
 
     while (consoleLog.childNodes.length > 50)
     {
@@ -139,11 +152,15 @@ wsUri = document.getElementById("wsUri");
     }
     
     consoleLog.scrollTop = consoleLog.scrollHeight;
+
+    return p;
   }
   
   function onOpen()
   {
     logToConsole("CONNECTED");
+    socket.emit('join',prompt('What is your nickname?'));
+    document.getElementById('chat').style.display = 'block';
     setGuiConnected(true);
   }
   
@@ -153,12 +170,12 @@ wsUri = document.getElementById("wsUri");
     setGuiConnected(false);
   }
   
-  function onMessage(evt)
+  function onMessage(from, msg)
   {
-    console.log(evt);
-    logToConsole('<span style="color: blue;">RESPONSE: ' + evt.msg+'</span>');
-     // we got echo back, measure latency
-     document.getElementById('latency').innerHTML = new Date - lastMessage;
+    console.log(from);
+    console.log(msg);
+    var p = logToConsole('<span class="bg-primary">'+from+': ' + msg.msg+'</span>');
+    p.className = 'bg-primary';
    }
 
    function onError(evt)
@@ -175,7 +192,10 @@ wsUri = document.getElementById("wsUri");
     document.getElementById('UploadBox').style.height = '270px';
     document.getElementById('UploadBox').style.textAlign = 'center';
     document.getElementById('Restart').style.left = '20px';
-    
+
+  }
+  function onAnnouncement (msg) {
+   logToConsole(msg);
   }
   function setGuiConnected(isConnected)
   {

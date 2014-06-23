@@ -14,12 +14,18 @@ app.use(express.static('public'));
 //listening on connections
 
 io.on('connection', function (socket) {
+    console.log('Someone conected');
+
 	socket
-	.on('message',function (msg) {
-        console.log('recibi message');
-		console.log('got :');
-        console.log(msg);
-		socket.emit('message',{'msg': 'pong!'});
+    .on('join',function (name) {
+        socket.nickname = name;
+        socket.broadcast.emit('announcement', name + ' joined the chat');
+    })
+	.on('message',function (msg,fn) {
+        //console.log('recibi message');
+        //console.log(msg);
+        socket.broadcast.emit('message', socket.nickname, msg);
+        fn(Date.now());
 	})
 	.on('Start',function (data) {
         //start uploading
