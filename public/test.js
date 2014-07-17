@@ -9,10 +9,12 @@
   var sendBut;
   var lastMessage;
   //var clearLogBut;
-  var SelectedFile;
+  var selectedFile;
   var socket;
   var FReader;
   var Name;
+  var user;
+  var initialized;
 
   function echoHandlePageLoad()
   {
@@ -47,6 +49,8 @@ wsUri = document.getElementById("wsUri");
 
  consoleLog = document.getElementById("box");
 
+ cursor = document.getElementById('cursor');
+ cursor.onclick = doCursor;
    // clearLogBut = document.getElementById("clearLogBut");
    // clearLogBut.onclick = clearLog;
 
@@ -85,13 +89,11 @@ wsUri = document.getElementById("wsUri");
 
   function doConnect()
   {
-    if (window.MozWebSocket)
-    {
+    if (window.MozWebSocket){
       logToConsole('<span style="color: red;"><strong>Info:</strong> This browser supports WebSocket using the MozWebSocket constructor</span>');
       window.WebSocket = window.MozWebSocket;
     }
-    else if (!window.WebSocket)
-    {
+    if (!window.WebSocket){
       logToConsole('<span style="color: red;"><strong>Error:</strong> This browser does not have support for WebSocket</span>');
       return;
     }
@@ -103,36 +105,38 @@ wsUri = document.getElementById("wsUri");
     } else {
       uri += "&encoding=text";
     }
+    //connect to server!
+    logToConsole("Log in ....");
     socket = io.connect(uri);
     onOpen();
-    socket.on('error', function (evt) { onError(evt);  });
-    socket.on('close', function (evt) { onClose(evt);  });
-    socket.on('message', onMessage );
-    socket.on('Done', function (data){ onDone(data,uri); });
-    socket.on('MoreData', function  (data) { onMoreData(data); });
-    socket.on('announcement',function (msg) {
-      onAnnouncement(msg);
-    })
+
   }
 
   function doDisconnect()
   {
-    socket.disconnect();
+    socket.emit('close');
+    logToConsole("DISCONNECTED");
+    setGuiConnected(false);
   }
 
-  function doSend()
-  {
-  var p = logToConsole("me: " + sendMessage.value);
+  function doSend(){
+  var p = logToConsole(sendMessage.value);
   // record the timestamp
   lastMessage =+ +new Date;
-  socket.emit('message', {'msg': sendMessage.value},function (date) {
+  socket.emit('message', {'msg': sendMessage.value}, function (date) {
   p.className = 'bg-success';
+  console.log(date);
   p.title = date;
   document.getElementById('latency').innerHTML = date - lastMessage;
   });
   sendMessage.value = '';
   sendMessage.focus();
   return false;
+  }
+  function doCursor () {
+    document.onmousemove = function (ev) {
+      socket.emit('position', {'x': ev.clientX, 'y': ev.clientY});
+    }
   }
 
   function logToConsole(message)
@@ -141,56 +145,108 @@ wsUri = document.getElementById("wsUri");
     var td = document.createElement("td");
     var p = document.createElement('p');
     p.innerHTML = message;
-    consoleLog.appendChild(tr);
-    tr.appendChild(td);
     td.appendChild(p);
-
+    tr.appendChild(td);
+    consoleLog.appendChild(tr);
 
     while (consoleLog.childNodes.length > 50)
     {
       consoleLog.removeChild(consoleLog.firstChild);
     }
-    
     consoleLog.scrollTop = consoleLog.scrollHeight;
 
     return p;
   }
-  
   function onOpen()
   {
-    logToConsole("CONNECTED");
-    socket.emit('join',prompt('What is your nickname?'));
+    user = prompt('What is your name?');
+    if(user === '' || user == null){
+      onError('bad user');
+      doDisconnect();
+      return;
+    }
+    logToConsole('Connected');
+    //listeners!!!
+    socket.on('error', function (evt) { onError(evt);  });
+    socket.on('close', function (id) { onClose(id);  });
+    socket.on('message', onMessage );
+    socket.on('done', function (file){ onDone(file); });
+    socket.on('moreData', function  (data) { onMoreData(data); });
+    socket.on('announcement',function (msg) {   onAnnouncement(msg);  });
+    socket.on('position',function (positions) {
+      //first time
+        if(!initialized){
+          var obj = JSON.parse(positions);
+          initialized = true;
+          for(var id in obj){
+          //console.log(obj[id]);
+          onMove(id,obj[id]);
+         // console.log(positions[pos]);
+          }
+        }else{
+          //mod
+          for(var i in positions){
+          //console.log(i);
+         // console.log(positions[i]);
+          onMove(i,positions[i]);
+          }
+        }
+    });
+    socket.on('join', function (evt) {
+      console.log(evt);
+    });
+    socket.emit('join',user);
     document.getElementById('chat').style.display = 'block';
     setGuiConnected(true);
   }
-  
-  function onClose(evt)
+  function onClose(id)
   {
-    logToConsole("DISCONNECTED");
-    setGuiConnected(false);
+   var cursor = document.getElementById('cursor-'+id);
+    cursor.parentNode.removeChild(cursor);
   }
-  
   function onMessage(from, msg)
   {
-    console.log(from);
-    console.log(msg);
+    if(from != user){
     var p = logToConsole('<span class="bg-primary">'+from+': ' + msg.msg+'</span>');
     p.className = 'bg-primary';
+    }
    }
-
-   function onError(evt)
-   {
-    logToConsole('<span style="color: red;">ERROR:</span> ' + evt.data);
+   function onMove (id,pos) {
+     var cursor = document.getElementById('cursor-'+id);
+     if(!cursor){
+      cursor = document.createElement('span');
+      cursor.id = 'cursor-'+id;
+      //cursor.src = '/cursor.png';
+      cursor.className = 'glyphicon glyphicon-hand-up';
+      cursor.style.position = 'absolute';
+      document.body.appendChild(cursor);
+     }
+     //console.log(pos);
+     cursor.style.left = pos.x + 'px';
+     cursor.style.top = pos.y + 'px';
   }
-  function onDone (data,Path) {
-    var Content = "Video Successfully Uploaded !!"
-    Content += "<img id='Thumb' src='" + Path + data['Image'] + "' alt='" + Name + "'><br>";
-    Content += "<button type='button' name='Upload' value='' id='Restart' class='Button'>Upload Another</button>";
+
+
+  function onError(evt)
+  {
+    logToConsole('<span style="color: red;">ERROR:</span> ' + evt);
+  }
+  function onDone (file) {
+    logToConsole('Video '+file.name+' Successfully Uploaded !!"');
+    var video = document.createElement('video');
+    var source = document.createElement('source');
+    var tr = document.createElement('tr');
+    var td = document.createElement("td");
+    source.src='Video/'+file.name;
+    video.appendChild(source);
+    td.appendChild(video);
+    tr.appendChild(td);
+    consoleLog.appendChild(tr);
+    console.log(video);
+    
+    var Content = "<button type='button' name='Upload' id='Restart' class='btn btn-success'>Upload Another</button>";
     document.getElementById('UploadArea').innerHTML = Content;
     document.getElementById('Restart').addEventListener('click', Refresh);
-    document.getElementById('UploadBox').style.width = '270px';
-    document.getElementById('UploadBox').style.height = '270px';
-    document.getElementById('UploadBox').style.textAlign = 'center';
     document.getElementById('Restart').style.left = '20px';
 
   }
@@ -220,66 +276,66 @@ wsUri = document.getElementById("wsUri");
  }
 }
 
-/*	function getSecureTag()
-	{
-		if (secureCb.checked)
-		{
-			return '<img src="img/tls-lock.png" width="6px" height="9px"> ';
-		}
-		else
-		{
-			return '';
-		}
-	}
-  */
-  function FileChosen(evnt) {
-    SelectedFile = evnt.target.files[0];
-    document.getElementById('NameBox').value = SelectedFile.name;
-  }
-
-
-  function StartUpload(){
-    if(document.getElementById('FileBox').value != "")
+/*  function getSecureTag()
+  {
+    if (secureCb.checked)
     {
-      FReader = new FileReader();
-      Name = document.getElementById('NameBox').value;
-      var Content = "<span id='NameArea'>Uploading " + SelectedFile.name + " as " + Name + "</span>";
-      Content += '<div id="ProgressContainer"><div id="ProgressBar"></div></div><span id="percent">0%</span>';
-      Content += "<span id='Uploaded'> - <span id='MB'>0</span>/" + Math.round(SelectedFile.size / 1048576) + "MB</span>";
-      document.getElementById('UploadArea').innerHTML = Content;
-      FReader.onload = function(evnt){
-        socket.emit('Upload', { 'Name' : Name, Data : evnt.target.result });
-      }
-      socket.emit('Start', { 'Name' : Name, 'Size' : SelectedFile.size });
+      return '<img src="img/tls-lock.png" width="6px" height="9px"> ';
     }
     else
     {
+      return '';
+    }
+  }
+  */
+
+  //chose file
+  function FileChosen(evnt) {
+    selectedFile = evnt.target.files[0];
+  }
+  //begin upload handle
+  function StartUpload(){
+    if(document.getElementById('FileBox').value != ""){
+      FReader = new FileReader();
+     // Name = document.getElementById('NameBox').value;
+      var content = '<div id="ProgressContainer"><div id="ProgressBar"></div></div><span id="percent">0%</span>';
+      content += "<span id='Uploaded'> - <span id='MB'>0</span>/" + Math.round(selectedFile.size / 1048576) + "MB</span>";
+      document.getElementById('UploadArea').innerHTML = content;
+      //onload chunk of data, set name
+      FReader.onload = function(evnt){
+        console.log(evnt);
+        socket.emit('upload', { 'name' : selectedFile.name, data : evnt.target.result });
+      }
+      //only execute at start
+      socket.emit('start', { 'name' : selectedFile.name, 'size' : selectedFile.size });
+    }else{
       alert("Please Select A File");
     }
   }
 
-
-
   function onMoreData(data){
-    UpdateBar(data['Percent']);
-        var Place = data['Place'] * 524288; //The Next Blocks Starting Position
-        var NewFile; //The Variable that will hold the new Block of Data
-        if(SelectedFile.slice){
-          NewFile = SelectedFile.slice(Place, Place + Math.min(524288, (SelectedFile.size-Place)));
-        }else if (SelectedFile.webkitSlice){
-          NewFile = SelectedFile.webkitSlice(Place, Place + Math.min(524288, (SelectedFile.size-Place)));
-        }else if(SelectedFile.mozSlice){
-          NewFile = SelectedFile.mozSlice(Place, Place + Math.min(524288, (SelectedFile.size-Place)));
-        }else{
-          throw new Error("falla!!");
-        }
-        FReader.readAsBinaryString(NewFile);
-      }
+    updateBar(data['percent']);
+    //The Next Blocks Starting Position
+    var place = data['place'] * 524288; 
+    var newFile; //The Variable that will hold the new Block of Data
 
-      function UpdateBar(percent){
+    //chunk current file
+        if(selectedFile.slice){
+          newFile = selectedFile.slice(place, place + Math.min(524288, (selectedFile.size-place)));
+        }else if (selectedFile.webkitSlice){
+          newFile = selectedFile.webkitSlice(place, place + Math.min(524288, (selectedFile.size-place)));
+        }else if(selectedFile.mozSlice){
+          newFile = selectedFile.mozSlice(place, place + Math.min(524288, (selectedFile.size-place)));
+        }else{
+          throw new Error("falla slice!!");
+        }
+        FReader.readAsBinaryString(newFile);
+  }
+
+      function updateBar(percent){
         document.getElementById('ProgressBar').style.width = percent + '%';
         document.getElementById('percent').innerHTML = (Math.round(percent*100)/100) + '%';
-        var MBDone = Math.round(((percent/100.0) * SelectedFile.size) / 1048576);
+        var MBDone = Math.round(((percent/100.0) * selectedFile.size) / 1048576);
         document.getElementById('MB').innerHTML = MBDone;
       }
 
@@ -287,5 +343,7 @@ wsUri = document.getElementById("wsUri");
       function Refresh(){
         location.reload(true);
       }
+//Something on ws!!!!
+    
 
       window.addEventListener("load", echoHandlePageLoad, false);

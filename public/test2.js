@@ -1,83 +1,35 @@
-var SelectedFile;
-var socket = io.connect('http://localhost:8000');
-var FReader;
-var Name;
+var sending = false,
+	response,
+	positions,
+	initialized = false;
+document.getElementById('ajax').onclick = doFollow;
+function doFollow () {
 
-window.addEventListener("load", Ready);
+$(document).mousemove(function (ev) {
+	//check position
+	//first time
+	response = $.post('/position',{x:ev.clientX, y:ev.clientY}, function(){
+		if(response.responseText != undefined){
+			positions = JSON.parse(response.responseText);
+			for(var id in positions){
+				onMove(id,positions[id]);
+			}
+		}
+	});
+});
 
-function Ready(){
-    if(window.File && window.FileReader){ //These are the relevant HTML5 objects that we are going to use 
-        document.getElementById('UploadButton').addEventListener('click', StartUpload);  
-        document.getElementById('FileBox').addEventListener('change', FileChosen);
-    }
-    else
-    {
-        document.getElementById('UploadArea').innerHTML = "Your Browser Doesn't Support The File API Please Update Your Browser";
-    }
 }
 
-function FileChosen(evnt) {
-    SelectedFile = evnt.target.files[0];
-    document.getElementById('NameBox').value = SelectedFile.name;
+function onMove (id,pos) {
+     var cursor = document.getElementById('cursor-'+id);
+     if(!cursor){
+      cursor = document.createElement('span');
+      cursor.id = 'cursor-'+id;
+      //cursor.src = '/cursor.png';
+      cursor.className = 'glyphicon glyphicon-hand-up';
+      cursor.style.position = 'absolute';
+      document.body.appendChild(cursor);
+     }
+     cursor.style.left = pos.x + 'px';
+     cursor.style.top = pos.y + 'px';
 }
-
-
-function StartUpload(){
-    if(document.getElementById('FileBox').value != "")
-    {
-        FReader = new FileReader();
-        Name = document.getElementById('NameBox').value;
-        var Content = "<span id='NameArea'>Uploading " + SelectedFile.name + " as " + Name + "</span>";
-        Content += '<div id="ProgressContainer"><div id="ProgressBar"></div></div><span id="percent">0%</span>';
-        Content += "<span id='Uploaded'> - <span id='MB'>0</span>/" + Math.round(SelectedFile.size / 1048576) + "MB</span>";
-        document.getElementById('UploadArea').innerHTML = Content;
-        FReader.onload = function(evnt){
-            socket.emit('Upload', { 'Name' : Name, Data : evnt.target.result });
-        }
-        socket.emit('Start', { 'Name' : Name, 'Size' : SelectedFile.size });
-    }
-    else
-    {
-        alert("Please Select A File");
-    }
-}
-
- socket.on('MoreData', function (data){
-    UpdateBar(data['Percent']);
-        var Place = data['Place'] * 524288; //The Next Blocks Starting Position
-        var NewFile; //The Variable that will hold the new Block of Data
-        if(SelectedFile.slice){
-            NewFile = SelectedFile.slice(Place, Place + Math.min(524288, (SelectedFile.size-Place)));
-        }else if (SelectedFile.webkitSlice){
-            NewFile = SelectedFile.webkitSlice(Place, Place + Math.min(524288, (SelectedFile.size-Place)));
-        }else if(SelectedFile.mozSlice){
-            NewFile = SelectedFile.mozSlice(Place, Place + Math.min(524288, (SelectedFile.size-Place)));
-        }else{
-            throw new Error("falla viejo!!");
-        }
-        FReader.readAsBinaryString(NewFile);
-    });
-
-function UpdateBar(percent){
-    document.getElementById('ProgressBar').style.width = percent + '%';
-    document.getElementById('percent').innerHTML = (Math.round(percent*100)/100) + '%';
-    var MBDone = Math.round(((percent/100.0) * SelectedFile.size) / 1048576);
-    document.getElementById('MB').innerHTML = MBDone;
-}
-
-var Path = "http://localhost:8000/";
-            
-            socket.on('Done', function (data){
-                var Content = "Video Successfully Uploaded !!"
-                Content += "<img id='Thumb' src='" + Path + data['Image'] + "' alt='" + Name + "'><br>";
-                Content += "<button type='button' name='Upload' value='' id='Restart' class='Button'>Upload Another</button>";
-                document.getElementById('UploadArea').innerHTML = Content;
-                document.getElementById('Restart').addEventListener('click', Refresh);
-                document.getElementById('UploadBox').style.width = '270px';
-                document.getElementById('UploadBox').style.height = '270px';
-                document.getElementById('UploadBox').style.textAlign = 'center';
-                document.getElementById('Restart').style.left = '20px';
-            });
-            function Refresh(){
-                location.reload(true);
-            }
