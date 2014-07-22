@@ -135,5 +135,7 @@ app.post('/position',function (req,res,next) {
     positions[req.session.user] = req.body;
     res.send(positions);
 });
-
-server.listen(8000);
+var port = Number(process.env.PORT || 8000);
+server.listen(port,function () {
+    console.log("listening on "+port);
+});
