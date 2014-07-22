@@ -2,7 +2,10 @@
   "name:": "ws-echo",
   "version": "0.0.1",
   "dependencies": {
-    "express": "3.x.x",
+    "express": "4.x.x",
+    "express-session":"*",
+    "body-parser":"*",
+    "cookie-parser":"*",
     "socket.io": "*",
     "util": "*"
   },

@@ -1,10 +1,12 @@
 var express = require('express'),
 app = express(),
-http = require('http'),
-server = http.createServer(app),
-io = require('socket.io').listen(server),
+server = require('http').Server(app),
+io = require('socket.io')(server),
 fs = require('fs'),
+session = require('express-session'),
 exec = require('child_process').exec,
+bodyParser = require('body-parser'),
+cookieParser = require('cookie-parser'),
 util = require('util');
 
 var files = {},
@@ -12,14 +14,18 @@ var files = {},
     total = 0,
     stack = 100;
 //serve our code
-app.use(express.static('public'));
-app.use(express.json());
-app.use(express.urlencoded());
+app.use('/',express.static(__dirname+'/public'));
+app.use(bodyParser.urlencoded({extended:false}));
+app.use(bodyParser.json());
 //session support
-app.use(express.cookieParser());
-app.use(express.session({secret: '123456789QWERTY'}));
+app.use(cookieParser());
+app.use(session({secret: '123456789QWERTY',
+                saveUninitialized: true,
+                resave:true}));
 //listening on connections
-
+app.get('/', function (req,res) {
+    res.sendfile(__dirname+'/index.html');
+});
 io.on('connection', function (socket) {
     socket
     .on('join',function (name) {
@@ -126,7 +132,6 @@ app.post('/position',function (req,res,next) {
         req.session.user = stack++;
     }
     res.set('Content-type','text/plain');
-    //console.log(req.xhr);
     positions[req.session.user] = req.body;
     res.send(positions);
 });
