@@ -15,9 +15,8 @@
           <input type='text' id='wsUri' placeholder='uri'><br>
           <button type='button' class='btn btn-success' id='connect' >Connect</button>
           <button type='button' class='btn btn-danger' id='disconnect' >Disconnect</button><br>
-          <h2>Latency: <span id="latency"></span>ms</h2>
-          <input type='button' id='cursor'> Cursor follow
-          <input type='button' id='ajax'> Ajax Cursor follow
+          <h2>Latency msg: <span id="latency-msg"></span>ms || Latency upload: <span id="latency-up"></span>ms || Latency cursor: <span id="latency-cur"></span>ms</h2>
+          <input type='button' id='cursor'> Cursor follow by WS  || <input type='button' id='ajax'> Cursor follow by Ajax
       </div>
     </div>
     <div class=".col-md-8">
@@ -36,6 +35,12 @@
         
       </div>
       <div id='mydiv'></div>
+      <div id='formHttp'>
+        <form action="/upload" enctype="multipart/form-data" method="post">
+          <input type='file' name='upload' >
+          <input type='submit' value='upload!'>
+        </form>
+      </div>
     </div>
   </div>
   </div>

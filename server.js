@@ -3,6 +3,7 @@ app = express(),
 server = require('http').Server(app),
 io = require('socket.io')(server),
 fs = require('fs'),
+formidable = require('formidable'),
 session = require('express-session'),
 exec = require('child_process').exec,
 bodyParser = require('body-parser'),
@@ -41,11 +42,12 @@ io.on('connection', function (socket) {
         socket.broadcast.emit('message', socket.username, msg );
         fn(Date.now());
 	})
-    .on('position',function (msg) {
+    .on('position',function (msg,fn) {
 
         positions[socket.id] = msg;
         //console.log(positions);
         socket.broadcast.emit('position', positions);
+        fn(Date.now());
     })
     .on('close',function () {
         console.log('recibi close');
@@ -86,7 +88,7 @@ io.on('connection', function (socket) {
 
         });
     })
-	.on('upload', function (data){
+	.on('upload', function (data,fn){
         console.log('recibi upload');
 		var name = data['name'];
 		files[name]['downloaded'] += data['data'].length;
@@ -135,6 +137,13 @@ app.post('/position',function (req,res,next) {
     positions[req.session.user] = req.body;
     res.send(positions);
 });
+app.post('/upload',function  (req,res,next) {
+    var form = new formidable.IncomingForm();
+    form.parse(req,function (err,fields,files) {
+        res.set('Content-type','text/plain');
+        res.send(util.inspect({fields:fields, files:files}));
+    });
+})
 var port = Number(process.env.PORT || 8000);
 server.listen(port,function () {
     console.log("listening on "+port);

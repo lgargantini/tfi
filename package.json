@@ -7,7 +7,8 @@
     "body-parser":"*",
     "cookie-parser":"*",
     "socket.io": "*",
-    "util": "*"
+    "util": "*",
+    "formidable":"*"
   },
   "scripts": {
     "start": "node server.js"

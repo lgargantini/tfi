@@ -8,6 +8,8 @@
   var sendMessage;
   var sendBut;
   var lastMessage;
+  var lastPos;
+  var lastUp;
   //var clearLogBut;
   var selectedFile;
   var socket;
@@ -127,7 +129,7 @@ wsUri = document.getElementById("wsUri");
   p.className = 'bg-success';
   console.log(date);
   p.title = date;
-  document.getElementById('latency').innerHTML = date - lastMessage;
+  document.getElementById('latency-msg').innerHTML = date - lastMessage;
   });
   sendMessage.value = '';
   sendMessage.focus();
@@ -135,7 +137,10 @@ wsUri = document.getElementById("wsUri");
   }
   function doCursor () {
     document.onmousemove = function (ev) {
-      socket.emit('position', {'x': ev.clientX, 'y': ev.clientY});
+      lastPos =+ +new Date;
+      socket.emit('position', {'x': ev.clientX, 'y': ev.clientY}, function (date) {
+        document.getElementById('latency-cur').innerHTML = date - lastPos;
+      });
     }
   }
 
@@ -297,14 +302,18 @@ wsUri = document.getElementById("wsUri");
   function StartUpload(){
     if(document.getElementById('FileBox').value != ""){
       FReader = new FileReader();
+
      // Name = document.getElementById('NameBox').value;
       var content = '<div id="ProgressContainer"><div id="ProgressBar"></div></div><span id="percent">0%</span>';
       content += "<span id='Uploaded'> - <span id='MB'>0</span>/" + Math.round(selectedFile.size / 1048576) + "MB</span>";
       document.getElementById('UploadArea').innerHTML = content;
       //onload chunk of data, set name
       FReader.onload = function(evnt){
+        lastUp = + new Date();
         console.log(evnt);
-        socket.emit('upload', { 'name' : selectedFile.name, data : evnt.target.result });
+        socket.emit('upload', { 'name' : selectedFile.name, data : evnt.target.result },function (date) {
+          document.getElementById('latency-up').innerHTML = date - lastUp;
+        });
       }
       //only execute at start
       socket.emit('start', { 'name' : selectedFile.name, 'size' : selectedFile.size });
