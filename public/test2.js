@@ -20,6 +20,12 @@ $(document).mousemove(function (ev) {
 
 }
 
+document.getElementById('disableAjax').onclick = doDisable;
+function doDisable () {
+	$(document).unbind('mousemove');
+	$.post('/logout');
+}
+
 function onMove (id,pos) {
      var cursor = document.getElementById('cursor-'+id);
      if(!cursor){
@@ -33,3 +39,4 @@ function onMove (id,pos) {
      cursor.style.left = pos.x + 'px';
      cursor.style.top = pos.y + 'px';
 }
+
