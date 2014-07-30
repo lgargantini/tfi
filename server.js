@@ -72,14 +72,28 @@ io.on('connection', function (socket) {
             data: "",
             downloaded: 0
         }
+
         try{
             //type of stat
-            var stat = fs.stat(__dirname +'/public/Temp/' +  name);
-            if(stat.isFile()){
-                files[name]['downloaded'] = stat.size;
-                place = stat.size / 524288;
-            }
-        }catch(er){} 
+            fs.stat(__dirname +'/public/Temp/' +  name, function (err,stats) {
+                
+                if(stats != undefined ){
+                   //file exists on temp
+                        files[name]['downloaded'] = stats.size;
+                        place = stats.size / 524288;
+                }
+            });
+            
+            fs.stat(__dirname+"/public/Video/",function (err,stats) {
+
+                if(stats == undefined){
+                    fs.mkdir(__dirname+"/public/Video/", 0775);
+                }
+            });
+
+        }catch(er){
+            console.error(er);
+        } 
         //New File
         fs.open(__dirname +"/public/Temp/" + name, "a", 0755, function(err, fd){
             if(err){
@@ -99,17 +113,18 @@ io.on('connection', function (socket) {
         files[name]['data'] += data['data'];
         //If File is Fully Uploaded
         if(files[name]['downloaded'] == files[name]['fileSize']){
+            
             fs.write(files[name]['handler'], files[name]['data'], null, 'binary', function(err, writen){
                 var inp = fs.createReadStream(__dirname +"/public/Temp/" + name);
                 var out = fs.createWriteStream(__dirname +"/public/Video/" + name);
-                util.pump(inp, out, function(){
-                    fs.unlink(__dirname +"/public/Temp/" + name, function () { //This Deletes The Temporary File
+                
+                inp.pipe(out);
+                    
+                fs.unlink(__dirname +"/public/Temp/" + name, function () { //This Deletes The Temporary File
                     //Moving File Completed
-                    //exec('vlc public/Video/'+name , function (err) {
                     socket.emit('done', {'name' : name });
                     //});
 
-                    });
                 });
             });
         }

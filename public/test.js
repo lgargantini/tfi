@@ -50,10 +50,8 @@ wsUri = document.getElementById("wsUri");
     if(window.File && window.FileReader){ //These are the relevant HTML5 objects that we are going to use 
       document.getElementById('UploadButton').addEventListener('click', StartUpload);  
       document.getElementById('FileBox').addEventListener('change', FileChosen);
-    }
-    else
-    {
-      document.getElementById('UploadArea').innerHTML = "Your Browser Doesn't Support The File API Please Update Your Browser";
+    }else{
+      document.getElementById('UploadAreaWs').innerHTML = "Your Browser Doesn't Support The File API Please Update Your Browser";
     }
 /*    if (window.WebSocket)
     {
@@ -264,7 +262,7 @@ function onOpen(){
     logToConsole('Video '+file.name+' Successfully Uploaded !!"');
     document.getElementById('latency-up').innerHTML = lastUp - initUp;
     var Content = "<button type='button' name='Upload' id='Restart' class='btn btn-success'>Upload Another</button>";
-    document.getElementById('UploadArea').innerHTML = Content;
+    document.getElementById('UploadAreaWs').innerHTML = Content;
     document.getElementById('Restart').addEventListener('click', Refresh);
     document.getElementById('Restart').style.left = '20px';
 
@@ -315,7 +313,7 @@ function onOpen(){
   }
   */
 
-  //chose file
+  //choose file
   function FileChosen(evnt) {
     selectedFile = evnt.target.files[0];
   }
@@ -328,7 +326,7 @@ function onOpen(){
      // Name = document.getElementById('NameBox').value;
      var content = '<div id="ProgressContainer"><div id="ProgressBar"></div></div><span id="percent">0%</span>';
      content += "<span id='Uploaded'> - <span id='MB'>0</span>/" + Math.round(selectedFile.size / 1048576) + "MB</span>";
-     document.getElementById('UploadArea').innerHTML = content;
+     document.getElementById('UploadAreaWs').innerHTML = content;
       //onload chunk of data, set name
       FReader.onload = function(evnt){
         console.log(evnt);
