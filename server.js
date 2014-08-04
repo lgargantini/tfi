@@ -12,6 +12,7 @@ util = require('util');
 
 var files = {},
     positions = {},
+    messages = {},
     total = 0,
     stack = 100;
 
@@ -38,9 +39,12 @@ io.on('connection', function (socket) {
         socket.broadcast.emit('position',JSON.stringify(positions));
     })
     .on('message',function (msg,fn) {
+        var date = Date.now();
         console.log('recibi message');
+        //add messages for ajax client
+        //messages[socket.user_id] = {msg:msg, date:date};
         socket.broadcast.emit('message', socket.username, msg );
-        fn(Date.now());
+        fn(date);
     })
     .on('position',function (msg,fn) {
 
@@ -146,21 +150,29 @@ io.on('connection', function (socket) {
 });
 //listening
 app.get('/', function (req,res) {
+    console.log('/ get');
     res.render('/index.html');
 });
 
+//cursor test
 app.post('/position',function (req,res,next) {
-
-    if(req.session.user_id == undefined){
-        console.log('nuevo req.session.user');
-        req.session.user_id = stack++;
-    }
+    console.log('/position');
+    req.session.user_id = checkUser(req.session.user_id);
     res.set('Content-type','text/plain');
     positions[req.session.user_id] = req.body;
     res.send(positions);
 });
 
+function checkUser (user) {
+    if(user == undefined){
+        console.log('nuevo req.session.user');
+        user = stack++;
+    }
+    return user;
+}
+//upload test
 app.post('/',function  (req,res,next) {
+    console.log('/ post');
     var form = new formidable.IncomingForm();
     form.parse(req,function (err,fields,files) {
         //res.set('Content-type','text/plain');
@@ -173,12 +185,29 @@ app.post('/',function  (req,res,next) {
             bytesReceived: bytesReceived,
             bytesExpected: bytesExpected
           };
-          console.log(JSON.stringify(progress));
-        });
+          //console.log(JSON.stringify(progress));
+    });
 
 });
 
+app.post('/latency',function (req,res,next) {
+    //just for latency matters
+    console.log('/latency');
+    res.send(200);
+});
+
+app.post('/msg',function (req,res,next) {
+    //get msg from user
+    console.log('/msg');
+    req.session.user_id = checkUser(req.session.user_id);
+    messages[req.session.user_id] = req.body.msg;
+    //console.log(req.body.msg);
+    res.send(messages);
+    
+});
+
 app.all('/logout',function  (req,res,next) {
+    console.log('/logout');
     delete positions[req.session.user_id];
     delete req.session;
 

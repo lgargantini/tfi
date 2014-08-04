@@ -136,6 +136,7 @@ function doSend(){
   sendMessage.focus();
   return false;
 }
+
 function doCursor () {
   
   if(connect){
