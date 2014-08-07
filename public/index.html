@@ -37,17 +37,17 @@
           <div id='chat'>
             <strong>Message Test:</strong>
             <input type="text" id="msg" placeholder='message'>
-            <button type='button' class='btn btn-success' id="send" >Send!</button>
+            <button type='button' class='btn btn-success' id="sendMsgWs" >Send!</button>
           </div>
 <br>
           <span id='UploadAreaWs'>
               <strong>WS Upload : </strong><br>
               <input type="file" id="FileBox">
-              <button  type='button' id='UploadButton' class='btn btn-success'>Upload</button>
+              <button  type='button' id='UploadButtonWs' class='btn btn-success'>Upload</button>
           </span>
 <br><br>
             <strong>Cursor Follow Test :</strong><br>
-            <input type='button' id='cursor'> Cursor follow (WS) </input>  <input type='button' id='disableWs'> Disable cursor</input>
+            <input type='button' id='enableCursorWs'> Cursor follow (WS) </input>  <input type='button' id='disableCursorWs'> Disable cursor</input>
           
       </div>
       <div class='col-md-6'>
@@ -55,7 +55,7 @@
             <strong>Message Test :</strong>
             
              <input type="text" id="msgAjax" placeholder='message'>
-             <button type='button' class='btn btn-success' id="sendAjax">Send!</button>
+             <button type='button' class='btn btn-success' id="sendMsgAjax">Send!</button>
             
 <br><br>
         <div id='UploadAreaAjax'>
@@ -67,7 +67,7 @@
         </div>
 
             <strong>Cursor Follow Test :</strong><br>
-            <input type='button' id='ajax'> Cursor follow (Ajax)</input> <input type='button' id='disableAjax'> Disable cursor</input>
+            <input type='button' id='enableCursorAjax'> Cursor follow (Ajax)</input> <input type='button' id='disableCursorAjax'> Disable cursor</input>
       </div>
   </div>
   <script src="/socket.io/socket.io.js"></script>

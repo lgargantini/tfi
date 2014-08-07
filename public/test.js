@@ -1,8 +1,4 @@
-
-  //var secureCb;
-  //var secureCbLabel;
-    //var clearLogBut;
-  var wsUri,
+var wsUri,
     consoleLog,
     connectBut,
     disconnectBut,
@@ -19,41 +15,41 @@
     user,
     initialized;
 
-function echoHandlePageLoad(){
-//TRIGGERS!!!
+function start(){
+
+//EVENTS HANDLERS!!!
+
 wsUri = document.getElementById("wsUri");
- //   toggleTls();
  connectBut = document.getElementById("connect");
  connectBut.onclick = doConnect;
+
  disconnectBut = document.getElementById("disconnect");
  disconnectBut.onclick = doDisconnect;
-
+//MSG 
  sendMessage = document.getElementById('msg');
- sendBut = document.getElementById("send");
+ 
+ sendBut = document.getElementById("sendMsgWs");
  sendBut.onclick = doSend;
-
+//LOG
  consoleLog = document.getElementById("box");
-
- cursor = document.getElementById('cursor');
+//CURSOR WS
+ cursor = document.getElementById('enableCursorWs');
  cursor.onclick = doCursor;
 
- cursorDisable = document.getElementById('disableWs');
+ cursorDisable = document.getElementById('disableCursorWs');
  cursorDisable.onclick = doDisableCursor;
-    //clearLogBut = document.getElementById("clearLogBut");
-    //clearLogBut.onclick = clearLog;
 
     setGuiConnected(false);
 
-    document.getElementById("disconnect").onclick = doDisconnect;
-    document.getElementById("send").onclick = doSend;
-
     if(window.File && window.FileReader){ //These are the relevant HTML5 objects that we are going to use 
-      document.getElementById('UploadButton').addEventListener('click', StartUpload);  
+      document.getElementById('UploadButtonWs').addEventListener('click', StartUpload);  
       document.getElementById('FileBox').addEventListener('change', FileChosen);
     }else{
       document.getElementById('UploadAreaWs').innerHTML = "Your Browser Doesn't Support The File API Please Update Your Browser";
     }
-/*    if (window.WebSocket)
+/*
+//***Extracted from example ***
+    if (window.WebSocket)
     {
       document.getElementById("webSocketSupp").style.display = "block";
     }
@@ -118,6 +114,7 @@ function doDisconnect(){
     setGuiConnected(false);
 
 }
+//MSG SECTION
 
 function doSend(){
     
@@ -127,19 +124,21 @@ function doSend(){
   
   socket.emit('message', {'msg': sendMessage.value}, function (date) {
     p.className = 'bg-success';
-    //console.log(date);
     //p.title = date;
     document.getElementById('latency-msg').innerHTML = date - lastMessage;
   });
-
+  //clean field
   sendMessage.value = '';
   sendMessage.focus();
   return false;
 }
 
+//CURSOR SECTION
+
 function doCursor () {
   
   if(connect){
+  
     document.onmousemove = function (ev) {
       lastPos = new Date();
       socket.emit('position', {'x': ev.clientX, 'y': ev.clientY}, function (date) {
@@ -156,6 +155,7 @@ function doDisableCursor () {
 
 }
 
+//LOG SECTION
 function logToConsole(message){
 
   var tr = document.createElement('tr');
@@ -186,7 +186,7 @@ function onOpen(){
   if(user === '' || user == null){
     onError('bad user');
     doDisconnect();
-    return;
+    return false;
   }
 
   logToConsole('Connected');
@@ -201,14 +201,20 @@ function onOpen(){
     socket.on('announcement',function (msg) {   onAnnouncement(msg);  });
     socket.on('position',function (positions) {
   
-    //first time
-  
-    var obj = JSON.parse(positions);
+    //console.log(positions);
+    var i;
+    try{
 
-      for(var id in obj){
-          onMove(id,obj[id]);
+    //var obj = JSON.parse(positions);
+
+      for(var id in positions){
+        i++;
+          onMove(i,positions[id]);
        }
    
+    }catch(e){
+      console.log(e);
+    }
    });
    
    socket.on('join', function (evt) { logToConsole(evt);  });
@@ -220,7 +226,7 @@ function onOpen(){
   }
 
   function onClose(id){
-
+//should erase every cursor
    var cursor = document.getElementById('cursor-'+id);
    document.body.removeChild(cursor);
 
@@ -235,7 +241,7 @@ function onOpen(){
   }
 
   function onMove (id,pos) {
-    
+    console.log('cursor'+id);
     var cursor = document.getElementById('cursor-'+id);
    
     if(!cursor){
@@ -273,7 +279,7 @@ function onOpen(){
       logToConsole(msg);
     }
     
-    function setGuiConnected(isConnected){
+function setGuiConnected(isConnected){
 
   wsUri.disabled = isConnected;
   connectBut.disabled = isConnected;
@@ -290,7 +296,10 @@ function onOpen(){
     labelColor = "#999999";
   }
    //  secureCbLabel.style.color = labelColor;
- }
+}
+
+/*
+//extracted from example
  function clearLog(){
 
   while (consoleLog.childNodes.length > 0){
@@ -301,7 +310,7 @@ function onOpen(){
 
 }
 
-/*  function getSecureTag()
+  function getSecureTag()
   {
     if (secureCb.checked)
     {
@@ -314,11 +323,11 @@ function onOpen(){
   }
   */
 
-  //choose file
+  //UPLOAD SECTION
   function FileChosen(evnt) {
     selectedFile = evnt.target.files[0];
   }
-  //begin upload handle
+
   function StartUpload(){
     if(document.getElementById('FileBox').value != ""){
       FReader = new FileReader();
@@ -372,7 +381,5 @@ function onOpen(){
   function Refresh(){
     location.reload(true);
   }
-//Something on ws!!!!
 
-
-window.addEventListener("load", echoHandlePageLoad, false);
+window.addEventListener("load", start, false);

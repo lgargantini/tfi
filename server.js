@@ -32,37 +32,36 @@ io.on('connection', function (socket) {
     socket
     .on('join',function (name) {
         console.log('Recibi join');
-        socket.username = name;
-        socket.user_id = total++;
-        socket.broadcast.emit('announcement', socket.username +' join the room');
-        //send the positions of everyone!
+        socket.user = name;
+        socket.broadcast.emit('announcement', socket.user +' join the room');
+        //send the positions to everyone!
         socket.broadcast.emit('position',JSON.stringify(positions));
     })
     .on('message',function (msg,fn) {
         var date = Date.now();
         console.log('recibi message');
         //add messages for ajax client
-        //messages[socket.user_id] = {msg:msg, date:date};
-        socket.broadcast.emit('message', socket.username, msg );
+        socket.broadcast.emit('message', socket.user, msg );
         fn(date);
     })
     .on('position',function (msg,fn) {
-
-        positions[socket.user_id] = msg;
+        //console.log('position(WS)');
+        if(checkUser(socket)){
+        positions[socket.user] = msg;
         //console.log(positions);
         socket.broadcast.emit('position', positions);
         fn(Date.now());
+        }
     })
     .on('close',function () {
         console.log('recibi close');
         //erase user from every wsocket connected
-        socket.broadcast.emit('close',socket.user_id);
+        socket.broadcast.emit('close',socket.user);
         //erase position
-    //    console.log(positions);
-        delete positions[socket.user_id];
-   //     console.log(positions);
+        delete positions[socket.user];
         //inform users
-        socket.broadcast.emit('announcement', socket.username +' left the room');
+        socket.broadcast.emit('announcement', socket.user +' left the room');
+
     })
     .on('start',function (data) {
         //start uploading
@@ -151,25 +150,20 @@ io.on('connection', function (socket) {
 //listening
 app.get('/', function (req,res) {
     console.log('/ get');
+    req.session.user.id = ++total;
     res.render('/index.html');
 });
 
 //cursor test
 app.post('/position',function (req,res,next) {
     console.log('/position');
-    req.session.user_id = checkUser(req.session.user_id);
+    if(req.session.user.id != undefined || req.session.user.id != 'undefined'){
     res.set('Content-type','text/plain');
-    positions[req.session.user_id] = req.body;
+    positions[req.session.user.id] = req.body;
     res.send(positions);
+    }
 });
 
-function checkUser (user) {
-    if(user == undefined){
-        console.log('nuevo req.session.user');
-        user = stack++;
-    }
-    return user;
-}
 //upload test
 app.post('/',function  (req,res,next) {
     console.log('/ post');
@@ -191,7 +185,7 @@ app.post('/',function  (req,res,next) {
 });
 
 app.post('/latency',function (req,res,next) {
-    //just for latency matters
+    //just for latency
     console.log('/latency');
     res.send(200);
 });
@@ -199,21 +193,29 @@ app.post('/latency',function (req,res,next) {
 app.post('/msg',function (req,res,next) {
     //get msg from user
     console.log('/msg');
-    req.session.user_id = checkUser(req.session.user_id);
-    messages[req.session.user_id] = req.body.msg;
-    //console.log(req.body.msg);
+
+    if(req.session.user.id != undefined || req.session.user.id != 'undefined'){
+    messages[req.session.user.id] = req.body.msg;
     res.send(messages);
+    }
     
 });
 
 app.all('/logout',function  (req,res,next) {
     console.log('/logout');
-    delete positions[req.session.user_id];
+    delete positions[req.session.user.id];
     delete req.session;
 
 });
+//only for WS
+function checkUser (socket) {
+    if(socket.user == 'undefined' || socket.user == undefined){
+        socket.disconnect();
+        return false;
+    }
+    return true;
+}
 
 server.listen(port,function () {
     console.log("listening on >"+port);
-
 });

@@ -6,15 +6,16 @@ messages,
 upAjaxBtn,
 initDate, lastDate,
 initialized = false;
-
-document.getElementById('ajax').onclick = doFollow;
-document.getElementById('disableAjax').onclick = doDisable;
-
-document.getElementById('sendAjax').onclick = doMsg;
+//CURSOR AJAX
+document.getElementById('enableCursorAjax').onclick = doFollow;
+document.getElementById('disableCursorAjax').onclick = doDisable;
+//MSG AJAX
+document.getElementById('sendMsgAjax').onclick = doMsg;
 msgAjax = document.getElementById('msgAjax');
-
-upAjaxBtn = document.getElementById('UploadButtonHttp')
+//UPLOAD AJAX
+upAjaxBtn = document.getElementById('UploadButtonHttp');
 upAjaxBtn.onclick = doUpload;
+
 
 function doMsg() {
 
@@ -101,6 +102,8 @@ function doDisable () {
 }
 
 function onMove (id,pos) {
+
+
 	var cursor = document.getElementById('cursor-'+id);
 	if(!cursor){
 		cursor = document.createElement('span');
