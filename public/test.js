@@ -4,8 +4,8 @@ var wsUri,
     disconnectBut,
     sendMessage,
     sendBut,
-    lastMessage,
-    lastPos,
+    initMessage, lastMessage,
+    initPos, lastPos,
     initUp,lastUp,
     selectedFile,
     socket,
@@ -65,23 +65,6 @@ wsUri = document.getElementById("wsUri");
     */
 
 }
-/*
-  function toggleTls()
-  {
-    var wsPort = (window.location.port.toString() === "" ? "" : ":"+window.location.port)
-    if (wsUri.value === "") {
-        wsUri.value = "ws://" + window.location.hostname.replace("www", "echo") + wsPort;
-    }
-    if (secureCb.checked)
-    {
-      wsUri.value = wsUri.value.replace("ws:", "wss:");
-    }
-    else
-    {
-      wsUri.value = wsUri.value.replace ("wss:", "ws:");
-    }
-  }
-  */
 
 function doConnect(){
 
@@ -120,12 +103,15 @@ function doSend(){
     
   var p = logToConsole(sendMessage.value);
   //record timestamp
-  lastMessage = new Date();
-  
-  socket.emit('message', {'msg': sendMessage.value}, function (date) {
-    p.className = 'bg-success';
-    //p.title = date;
-    document.getElementById('latency-msg').innerHTML = date - lastMessage;
+  initMessage = Date.now();
+  console.log('init'+initMessage);
+  p.className = 'bg-warning';
+
+  socket.emit('message', {'msg': sendMessage.value}, function (status) {
+    lastMessage = Date.now();
+    console.log('last'+lastMessage);
+    p.className = status;
+    document.getElementById('latency-msg').innerHTML = lastMessage - initMessage;
   });
   //clean field
   sendMessage.value = '';
@@ -138,20 +124,32 @@ function doSend(){
 function doCursor () {
   
   if(connect){
-  
-    document.onmousemove = function (ev) {
-      lastPos = new Date();
-      socket.emit('position', {'x': ev.clientX, 'y': ev.clientY}, function (date) {
-        document.getElementById('latency-cur').innerHTML = date - lastPos;
-      });
-    }
+
+    document.addEventListener('mousemove',doMove,false);
+
   }
 
 }
+
+function doMove(ev) {
+
+      initPos = new Date();
+      socket.emit('position', {'x': ev.clientX, 'y': ev.clientY}, function (status) {
+        lastPos = Date.now();
+        document.getElementById('latency-cur').className = status;
+        document.getElementById('latency-cur').innerHTML = lastPos - initPos;
+      
+      });
+}
+
 function doDisableCursor () {
   
-  if(connect)
-    $(document).unbind('mousemove');
+  if(connect){
+    
+    document.removeEventListener('mousemove',doMove,false);
+    document.getElementById('latency-cur').innerHTML = '';
+    //$(document).unbind('onmousemove');
+  }
 
 }
 
@@ -199,32 +197,16 @@ function onOpen(){
     socket.on('done', function (file){ onDone(file); });
     socket.on('moreData', function  (data) { onMoreData(data); });
     socket.on('announcement',function (msg) {   onAnnouncement(msg);  });
-    socket.on('position',function (positions) {
-  
-    //console.log(positions);
-    var i;
-    try{
-
-    //var obj = JSON.parse(positions);
-
-      for(var id in positions){
-        i++;
-          onMove(i,positions[id]);
-       }
-   
-    }catch(e){
-      console.log(e);
-    }
-   });
-   
-   socket.on('join', function (evt) { logToConsole(evt);  });
+    socket.on('position',function (positions) { onPositions(positions);  });
+    socket.on('join', function (evt) { logToConsole(evt);  });
     
    socket.emit('join',user);
-   
    setGuiConnected(true);
 
   }
 
+
+  
   function onClose(id){
 //should erase every cursor
    var cursor = document.getElementById('cursor-'+id);
@@ -232,12 +214,28 @@ function onOpen(){
 
   }
 
- function onMessage(from, msg){
+  function onMessage(from, msg){
 
     if(from != user){
       var p = logToConsole('<span class="bg-primary">'+from+': ' + msg.msg+'</span>');
       p.className = 'bg-primary';
     }
+  }
+  
+  function onPositions (positions) {
+  var i;
+
+  try{
+      
+      for(var id in positions){
+        i++;
+          onMove(i,positions[id]);
+      }
+   
+  }catch(e){
+      console.log(e);
+  }
+
   }
 
   function onMove (id,pos) {
@@ -279,6 +277,7 @@ function onOpen(){
       logToConsole(msg);
     }
     
+
 function setGuiConnected(isConnected){
 
   wsUri.disabled = isConnected;
@@ -331,7 +330,7 @@ function setGuiConnected(isConnected){
   function StartUpload(){
     if(document.getElementById('FileBox').value != ""){
       FReader = new FileReader();
-      initUp = new Date();
+      initUp = Date.now();
 
      // Name = document.getElementById('NameBox').value;
      var content = '<div id="ProgressContainer"><div id="ProgressBar"></div></div><span id="percent">0%</span>';
@@ -340,8 +339,10 @@ function setGuiConnected(isConnected){
       //onload chunk of data, set name
       FReader.onload = function(evnt){
         console.log(evnt);
-        socket.emit('upload', { 'name' : selectedFile.name, data : evnt.target.result },function (date) {
-          lastUp = date;
+        socket.emit('upload', { 'name' : selectedFile.name, data : evnt.target.result },function (status) {
+          lastUp = Date.now();
+          document.getElementById('latency-up').className = status;
+          document.getElementById('latency-up').innerHTML = lastUp - initUp;
         });
       }
       //only execute at start

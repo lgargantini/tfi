@@ -38,11 +38,10 @@ io.on('connection', function (socket) {
         socket.broadcast.emit('position',JSON.stringify(positions));
     })
     .on('message',function (msg,fn) {
-        var date = Date.now();
         console.log('recibi message');
         //add messages for ajax client
         socket.broadcast.emit('message', socket.user, msg );
-        fn(date);
+        fn('bg-success');
     })
     .on('position',function (msg,fn) {
         //console.log('position(WS)');
@@ -50,7 +49,7 @@ io.on('connection', function (socket) {
         positions[socket.user] = msg;
         //console.log(positions);
         socket.broadcast.emit('position', positions);
-        fn(Date.now());
+        fn('bg-info');
         }
     })
     .on('close',function () {
@@ -109,7 +108,7 @@ io.on('connection', function (socket) {
 
         });
     })
-    .on('upload', function (data,fn){
+    .on('upload', function (data, fn){
         console.log('recibi upload');
         var name = data['name'];
         files[name]['downloaded'] += data['data'].length;
@@ -144,24 +143,23 @@ io.on('connection', function (socket) {
             var percent = (files[name]['downloaded'] / files[name]['fileSize']) * 100;
             socket.emit('moreData', { 'place' : place, 'percent' :  percent});
         }
-        fn(Date.now());
+        fn('bg-info');
     })
 });
 //listening
 app.get('/', function (req,res) {
     console.log('/ get');
-    req.session.user.id = ++total;
+    req.session.user = ++total;
     res.render('/index.html');
 });
 
 //cursor test
 app.post('/position',function (req,res,next) {
     console.log('/position');
-    if(req.session.user.id != undefined || req.session.user.id != 'undefined'){
+    var user = checkId(req.session.user);
     res.set('Content-type','text/plain');
-    positions[req.session.user.id] = req.body;
+    positions[user] = req.body;
     res.send(positions);
-    }
 });
 
 //upload test
@@ -193,20 +191,25 @@ app.post('/latency',function (req,res,next) {
 app.post('/msg',function (req,res,next) {
     //get msg from user
     console.log('/msg');
-
-    if(req.session.user.id != undefined || req.session.user.id != 'undefined'){
-    messages[req.session.user.id] = req.body.msg;
+    var user = checkId(req.session.user);
+    messages[user] = req.body.msg;
     res.send(messages);
-    }
+    
     
 });
 
 app.all('/logout',function  (req,res,next) {
     console.log('/logout');
-    delete positions[req.session.user.id];
+    delete positions[req.session.user];
     delete req.session;
 
 });
+//only for http/ajax
+function checkId (id) {
+    if(id == 'undefined' || id == undefined)
+        id = ++total;
+    return id;
+}
 //only for WS
 function checkUser (socket) {
     if(socket.user == 'undefined' || socket.user == undefined){
@@ -217,5 +220,5 @@ function checkUser (socket) {
 }
 
 server.listen(port,function () {
-    console.log("listening on >"+port);
+    console.log("listening on > "+port);
 });

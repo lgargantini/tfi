@@ -20,14 +20,12 @@ upAjaxBtn.onclick = doUpload;
 function doMsg() {
 
 	if( msgAjax.value != undefined){
-		//console.log(msgAjax.value);
 		response = httpPost('/msg', msgAjax.value);
 		if(response != undefined){
 			
 			console.log(response);
 		}
 
-		logToConsole(msgAjax.value);
 		msgAjax.value='';
 		msgAjax.focus();
 		doLatency('latency-msg');
