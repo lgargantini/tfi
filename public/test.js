@@ -47,22 +47,6 @@ wsUri = document.getElementById("wsUri");
     }else{
       document.getElementById('UploadAreaWs').innerHTML = "Your Browser Doesn't Support The File API Please Update Your Browser";
     }
-/*
-//***Extracted from example ***
-    if (window.WebSocket)
-    {
-      document.getElementById("webSocketSupp").style.display = "block";
-    }
-    else
-    {
-      document.getElementById("noWebSocketSupp").style.display = "block";
-    }
-
-    secureCb = document.getElementById("secureCb");
-    secureCb.checked = false;
-    secureCb.onclick = toggleTls;
-    secureCbLabel = document.getElementById("secureCbLabel")
-    */
 
 }
 
@@ -104,12 +88,12 @@ function doSend(){
   var p = logToConsole(sendMessage.value);
   //record timestamp
   initMessage = Date.now();
-  console.log('init'+initMessage);
+  //console.log('init'+initMessage);
   p.className = 'bg-warning';
 
-  socket.emit('message', {'msg': sendMessage.value}, function (status) {
+  socket.emit('message', {'msg': sendMessage.value, 'date': initMessage}, function (status) {
     lastMessage = Date.now();
-    console.log('last'+lastMessage);
+    //console.log('last'+lastMessage);
     p.className = status;
     document.getElementById('latency-msg').innerHTML = lastMessage - initMessage;
   });

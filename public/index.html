@@ -56,6 +56,7 @@
             
              <input type="text" id="msgAjax" placeholder='message'>
              <button type='button' class='btn btn-success' id="sendMsgAjax">Send!</button>
+
             
 <br><br>
         <div id='UploadAreaAjax'>
@@ -67,7 +68,11 @@
         </div>
 
             <strong>Cursor Follow Test :</strong><br>
-            <input type='button' id='enableCursorAjax'> Cursor follow (Ajax)</input> <input type='button' id='disableCursorAjax'> Disable cursor</input>
+            <input type='button' id='enableCursorAjax'> Cursor follow (Ajax)</input>
+            <input type='button' id='disableCursorAjax'> Disable cursor</input>
+            <br><br>
+            <strong>GET loop (for msgs and positions):</strong>
+             <input type='text' id='getMsg' placeholder='get every ... (ms)'>
       </div>
   </div>
   <script src="/socket.io/socket.io.js"></script>

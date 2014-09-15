@@ -40,14 +40,18 @@ io.on('connection', function (socket) {
     .on('message',function (msg,fn) {
         console.log('recibi message');
         //add messages for ajax client
+        var m = {
+            date: msg.date,
+            usr: socket.user,
+            msg: msg.msg            
+        }
+        messages[msg.date] = m;
         socket.broadcast.emit('message', socket.user, msg );
         fn('bg-success');
     })
     .on('position',function (msg,fn) {
-        //console.log('position(WS)');
         if(checkUser(socket)){
         positions[socket.user] = msg;
-        //console.log(positions);
         socket.broadcast.emit('position', positions);
         fn('bg-info');
         }
@@ -149,16 +153,28 @@ io.on('connection', function (socket) {
 //listening
 app.get('/', function (req,res) {
     console.log('/ get');
-    req.session.user = ++total;
     res.render('/index.html');
+});
+
+
+app.get('/msg',function (req,res,next) {
+
+    if(req.session.id){
+        res.send(messages);
+    }
+});
+
+app.get('/position',function (req,res,next) {
+    if(req.session.id){
+        res.send(positions);
+    }
 });
 
 //cursor test
 app.post('/position',function (req,res,next) {
-    console.log('/position');
-    var user = checkId(req.session.user);
+   // console.log('/position');
     res.set('Content-type','text/plain');
-    positions[user] = req.body;
+    positions[req.body.usr] = req.body;
     res.send(positions);
 });
 
@@ -167,9 +183,7 @@ app.post('/',function  (req,res,next) {
     console.log('/ post');
     var form = new formidable.IncomingForm();
     form.parse(req,function (err,fields,files) {
-        //res.set('Content-type','text/plain');
-        //res.send(util.inspect({fields:fields, files:files}));
-        res.redirect('/');
+    res.redirect('/');
     });
     form.on('progress', function(bytesReceived, bytesExpected) {
           var progress = {
@@ -177,11 +191,10 @@ app.post('/',function  (req,res,next) {
             bytesReceived: bytesReceived,
             bytesExpected: bytesExpected
           };
-          //console.log(JSON.stringify(progress));
     });
 
 });
-
+//latency test
 app.post('/latency',function (req,res,next) {
     //just for latency
     console.log('/latency');
@@ -191,25 +204,27 @@ app.post('/latency',function (req,res,next) {
 app.post('/msg',function (req,res,next) {
     //get msg from user
     console.log('/msg');
-    var user = checkId(req.session.user);
-    messages[user] = req.body.msg;
+
+    if(req.session.id){
+    
+    var m ={
+        date: req.body.date,
+        usr: req.body.usr,
+        msg: req.body.msg
+    };
+
+    messages[req.body.date] = m;
     res.send(messages);
-    
-    
+    }
+        
 });
 
 app.all('/logout',function  (req,res,next) {
     console.log('/logout');
-    delete positions[req.session.user];
+    delete positions[req.body.usr];
     delete req.session;
-
 });
-//only for http/ajax
-function checkId (id) {
-    if(id == 'undefined' || id == undefined)
-        id = ++total;
-    return id;
-}
+
 //only for WS
 function checkUser (socket) {
     if(socket.user == 'undefined' || socket.user == undefined){
