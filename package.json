@@ -3,12 +3,12 @@
   "version": "0.0.1",
   "dependencies": {
     "express": "4.x.x",
-    "express-session":"*",
-    "body-parser":"*",
-    "cookie-parser":"*",
-    "socket.io": "*",
-    "util": "*",
-    "formidable":"*"
+    "express-session": "~1.8.2",
+    "body-parser": "~1.9.0",
+    "cookie-parser": "~1.3.3",
+    "socket.io": "~1.1.0",
+    "util": "~0.10.3",
+    "formidable": "~1.0.15"
   },
   "scripts": {
     "start": "node server.js"
@@ -16,7 +16,16 @@
   "name": "tfi-websocket",
   "description": "tfi ===",
   "main": "server.js",
-  "devDependencies": {},
+  "devDependencies": {
+    "gulp": "~3.8.8",
+    "gulp-mocha": "~1.1.1",
+    "gulp-nodemon": "~1.0.4",
+    "gulp-util": "~3.0.1",
+    "gulp-jshint": "~1.8.5",
+    "should": "~4.0.4",
+    "socket.io-client": "~1.1.0",
+    "websocket-bench": "0.0.6"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/lgargantini/tfi.git"

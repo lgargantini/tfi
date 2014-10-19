@@ -1,16 +1,18 @@
-var sending = false,
-response,
+'use strict';
+//var sending = false,
+var response,
 positions,
-msgAjaxBtn,
+//msgAjaxBtn,
 lastMsgDate,
 upAjaxBtn,
 user,
+msgAjax,
 check,
-initDate, lastDate,
-messages,
-initialized = false;
+initDate, lastDate;
+//messages,
+//initialized = false;
 //log
-consoleLog = document.getElementById("box");
+var consoleLog = document.getElementById('box');
 //CURSOR AJAX
 document.getElementById('enableCursorAjax').onclick = doFollow;
 document.getElementById('disableCursorAjax').onclick = doDisable;
@@ -32,7 +34,7 @@ function loginUser () {
 
 function doMsg() {
 
-	if( msgAjax.value != undefined){
+	if( msgAjax.value !== undefined){
 		
 		if(!user){
 			loginUser();		
@@ -49,7 +51,7 @@ function doMsg() {
 
 function getValues () {
 	console.log(check.value);
-	if(check.value != undefined){
+	if(check.value !== undefined){
 	setInterval(function () {
 				
 				httpRequest('GET','/msg','messageGet');
@@ -67,39 +69,40 @@ function doLatency (type) {
 	
 	initDate = new Date();
 	response = httpRequest('POST','/latency', null);
-	if(response != undefined){
+	if(response !== undefined){
 		lastDate = new Date();
 		document.getElementById(type).innerHTML = lastDate - initDate;
 	}
 }
 
-function httpRequest (form, theUrl, msgUrl) {
+function httpRequest (verb, theUrl, msgUrl) {
 	var xmlHttp = null;
 	console.log(theUrl);
 
 	xmlHttp = new XMLHttpRequest();
-	xmlHttp.open( form, theUrl, true );
+	xmlHttp.open( verb, theUrl, true );
 	
-	if(msgUrl != null){
+	if(msgUrl !== null){
 
-		xmlHttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+		xmlHttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
 		xmlHttp.onreadystatechange=function(){
 
 		  if (xmlHttp.readyState==4 && xmlHttp.status==200) {
 
-		    if(xmlHttp.responseText != undefined){
+		    if(xmlHttp.responseText !== undefined){
+		    	console.log('got answer xmlHttp'+xmlHttp.response);
 		    	parseResp(JSON.parse(xmlHttp.response), msgUrl);
 			}
 
 		  }
 
-	  	}
+	  	};
 	}
 	xmlHttp.send( 'msg='+msgUrl );
 
 }
 function parseResp (obj,msg) {
-	//console.log(msg);
+	console.log('estoy en parseResp y tengo'+msg);
 	switch(msg){
 		case 'messageGet':
 			parseMsg(obj);
@@ -114,7 +117,7 @@ function parseResp (obj,msg) {
 
 function parseMsg (obj) {
 	console.log(obj);
-	for(id in obj){
+	for(var id in obj){
 		if(obj[id].date >= lastMsgDate){
 			var p = logToConsole('<span class="bg-primary">'+obj[id].usr+': ' + obj[id].msg+'</span>');
    				p.className = 'bg-primary';
@@ -132,7 +135,6 @@ function parsePos (obj) {
 }
 
 function doFollow () {
-
 	$(document).mousemove(function (ev) {
 	//check position
 	//first time
@@ -143,14 +145,10 @@ function doFollow () {
 	initDate = new Date();
 	response = $.post('/position', { x: ev.clientX, y: ev.clientY , usr: user},
 									function(){
-		if(response.responseText != undefined){
+		if(response.responseText !== undefined){
 			positions = JSON.parse(response.responseText);
 			lastDate = new Date();
 			document.getElementById('latency-cur').innerHTML = lastDate - initDate;
-			/*
-			for(var id in positions){
-				onMove(id,positions[id]);
-			}*/
 		}
 	});
 });
@@ -184,7 +182,7 @@ function onMove (id,pos) {
 function logToConsole(message){
 
   var tr = document.createElement('tr');
-  var td = document.createElement("td");
+  var td = document.createElement('td');
   var p = document.createElement('p');
   
   p.innerHTML = message;
