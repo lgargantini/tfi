@@ -15,8 +15,6 @@ var formidable = require('formidable');
 		            bytesReceived: bytesReceived,
 		            bytesExpected: bytesExpected
 		          };
-		          //TODO progress 
-		          //show progressfunc
 		    });
 
 		}

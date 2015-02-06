@@ -5,8 +5,9 @@ module.exports = function (messages) {
 
 		get:function (req,res,next) {
 		    if(req.session.id){
-		    	//console.log(messages);
+
 		        res.send(messages);
+
 		    }
 		},
 		post:function (req,res,next) {
@@ -24,7 +25,7 @@ module.exports = function (messages) {
 		    };
 
 		    messages[date] = m;
-		    //console.log(messages);
+
 		    res.send(messages);
 		    }
 		        

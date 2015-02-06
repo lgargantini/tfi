@@ -1,27 +1,28 @@
 'use strict';
 //var sending = false,
-var response,
-positions,
-//msgAjaxBtn,
-lastMsgDate,
-upAjaxBtn,
-user,
-msgAjax,
-check,
-initDate, lastDate;
-//messages,
-//initialized = false;
+var response;
+var positions;
+var lastMsgDate;
+var upAjaxBtn; 
+var user;
+var msgAjax;
+var check;
+var initDate;
+var lastDate;
+
 //log
 var consoleLog = document.getElementById('box');
+
 //CURSOR AJAX
 document.getElementById('enableCursorAjax').onclick = doFollow;
 document.getElementById('disableCursorAjax').onclick = doDisable;
+
 //MSG AJAX
 msgAjax = document.getElementById('msgAjax');
 document.getElementById('sendMsgAjax').onclick = doMsg;
 
 check = document.getElementById('getMsg');
-document.getElementById('getMsg').onchange = getValues;
+check.onchange = getValues;
 
 //UPLOAD AJAX
 upAjaxBtn = document.getElementById('UploadButtonHttp');
@@ -36,9 +37,7 @@ function doMsg() {
 
 	if( msgAjax.value !== undefined){
 		
-		if(!user){
-			loginUser();		
-		}
+		if(!user){ loginUser(); }
 
 		var m = msgAjax.value+'&usr='+user+'&date='+Date.now();
 		httpRequest('POST','/msg', m);
@@ -50,19 +49,22 @@ function doMsg() {
 }
 
 function getValues () {
+	
 	console.log(check.value);
 	if(check.value !== undefined){
-	setInterval(function () {
+		setInterval(function () {
 				
 				httpRequest('GET','/msg','messageGet');
 				httpRequest('GET','/position','positionGet');
 
 				}, 1000); 
-	}
+		}
 }
 
 function doUpload () {
+	
 	doLatency('latency-up');
+
 }
 
 function doLatency (type) {
@@ -73,12 +75,13 @@ function doLatency (type) {
 		lastDate = new Date();
 		document.getElementById(type).innerHTML = lastDate - initDate;
 	}
+
 }
 
 function httpRequest (verb, theUrl, msgUrl) {
+
 	var xmlHttp = null;
 	console.log(theUrl);
-
 	xmlHttp = new XMLHttpRequest();
 	xmlHttp.open( verb, theUrl, true );
 	
@@ -87,7 +90,7 @@ function httpRequest (verb, theUrl, msgUrl) {
 		xmlHttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
 		xmlHttp.onreadystatechange=function(){
 
-		  if (xmlHttp.readyState==4 && xmlHttp.status==200) {
+		  if (xmlHttp.readyState === 4 && xmlHttp.status === 200) {
 
 		    if(xmlHttp.responseText !== undefined){
 		    	console.log('got answer xmlHttp'+xmlHttp.response);
@@ -101,40 +104,54 @@ function httpRequest (verb, theUrl, msgUrl) {
 	xmlHttp.send( 'msg='+msgUrl );
 
 }
+
 function parseResp (obj,msg) {
+
 	console.log('estoy en parseResp y tengo'+msg);
+	
 	switch(msg){
+
 		case 'messageGet':
 			parseMsg(obj);
 			break;
+		
 		case 'positionGet':
 			parsePos(obj);
 			break;
+		
 		default:
 			break;
+	
 	}
+
 }
 
 function parseMsg (obj) {
+	
 	console.log(obj);
+
 	for(var id in obj){
 		if(obj[id].date >= lastMsgDate){
 			var p = logToConsole('<span class="bg-primary">'+obj[id].usr+': ' + obj[id].msg+'</span>');
-   				p.className = 'bg-primary';
+   			p.className = 'bg-primary';
 		}
 	}
 	//update lastMsgDate
 	lastMsgDate = Date.now();
+
 }				
 
 function parsePos (obj) {
+	
 	console.log(obj);
 	for(var id in obj){
 		onMove(id, obj[id]);
 	}
+
 }
 
 function doFollow () {
+
 	$(document).mousemove(function (ev) {
 	//check position
 	//first time
@@ -156,13 +173,14 @@ function doFollow () {
 }
 
 function doDisable () {
+
 	$(document).unbind('mousemove');
 	document.getElementById('latency-cur').innerHTML = '';
 	$.post('/logout');
+
 }
 
 function onMove (id,pos) {
-
 
 	var cursor = document.getElementById('cursor-'+id);
 	if(!cursor){
@@ -176,6 +194,7 @@ function onMove (id,pos) {
 
   cursor.style.left = pos.x + 'px';
   cursor.style.top = pos.y + 'px';
+
 }
 
 //LOG SECTION
@@ -191,12 +210,10 @@ function logToConsole(message){
   consoleLog.appendChild(tr);
 
   while (consoleLog.childNodes.length > 50){
-
     consoleLog.removeChild(consoleLog.firstChild);
-
   }
-
   consoleLog.scrollTop = consoleLog.scrollHeight;
 
   return p;
+
 }
