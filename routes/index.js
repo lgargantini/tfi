@@ -1,5 +1,5 @@
 'use strict';
-module.exports = function (app, controller, io,positions, messages, files) {
+module.exports = function (app, controller, io, positions, messages, files) {
 var fs = require('fs');
 
 //listening
@@ -14,6 +14,7 @@ app.post('/position',controller.position.post);
 
 //upload test
 app.post('/', controller.upload.post);
+app.get('/upload',controller.upload.get);
 
 //latency test
 app.post('/latency', controller.general.latency);
@@ -77,19 +78,24 @@ io.on('connection', function (socket) {
 
         try{
             //type of stat
-            fs.stat(__dirname +'/public/Temp/' +  name, function (err,stats) {
-                
-                if(stats !== undefined ){
-                   //file exists on temp
-                        files[name].downloaded = stats.size;
-                        place = stats.size / 524288;
+            console.log('__dirname'+__dirname);
+            fs.stat(__dirname+'/Temp/',function (err,stats) {
+                if(stats === undefined){
+                    console.log('creando carpeta Temp');
+                    fs.mkdir(__dirname+'/Temp/', '0775');
                 }
             });
-            
-            fs.stat(__dirname+'/public/Video/',function (err,stats) {
-
+            fs.stat(__dirname+'/Video/',function (err,stats) {
                 if(stats === undefined){
-                    fs.mkdir(__dirname+'/public/Video/', '0775');
+                    console.log('creando carpeta Video');
+                    fs.mkdir(__dirname+'/Video/', '0775');
+                }
+            });
+            fs.stat(__dirname +'/Temp/' +  name, function (err,stats) {
+                if(stats !== undefined){
+                    //file exists on temp
+                    files[name].downloaded = stats.size;
+                    place = stats.size / 524288;
                 }
             });
 
@@ -97,21 +103,21 @@ io.on('connection', function (socket) {
             console.error(er);
         } 
         //New File
-        fs.open(__dirname +'/public/Temp/' + name, 'a', '0755', function(err, fd){
-            
+        fs.open(__dirname +'/Temp/' + name, 'a', '0755', function(err, fd){
             if(err){
                 console.error(err);
             }
-            //store the file descriptor so we can write to it later
+            //store the file descriptor so we can write on it later
             files[name].handler = fd;
             //first MoreData
             socket.emit('moreData', { 'place' : place, percent : 0 });
-
         });
     })
     .on('upload', function wsUpload(data, fn){
         
         console.info('recibi upload');
+        console.log(data.name);
+        console.log(data.data.length);
         var name = data.name;
         files[name].downloaded += data.data.length;
         files[name].data += data.data;
@@ -119,12 +125,12 @@ io.on('connection', function (socket) {
         if(files[name].downloaded == files[name].fileSize){
             
             fs.write(files[name].handler, files[name].data, null, 'binary', function(){
-                var inp = fs.createReadStream(__dirname +'/public/Temp/' + name);
-                var out = fs.createWriteStream(__dirname +'/public/Video/' + name);
+                var inp = fs.createReadStream(__dirname +'/Temp/' + name);
+                var out = fs.createWriteStream(__dirname +'/Video/' + name);
                 
                 inp.pipe(out);
                     
-                fs.unlink(__dirname +'/public/Temp/' + name, function () { //This Deletes The Temporary File
+                fs.unlink(__dirname +'/Temp/' + name, function () { //This Deletes The Temporary File
                     //Moving File Completed
                     socket.emit('done', {'name' : name });
                     //});
@@ -133,7 +139,9 @@ io.on('connection', function (socket) {
             });
         }
         //If the Data Buffer reaches 10MB
-        else if(files[name].data.length > 10485760){ 
+        else if(files[name].data.length > 10485760){
+            console.log(files[name].handler);
+            console.log(files[name].data.length);
             fs.write(files[name].handler, files[name].data, null, 'binary', function(){
                 files[name].data = ''; //Reset The Buffer
                 var place = files[name].downloaded / 524288;
@@ -156,7 +164,6 @@ function checkUser (socket) {
         return false;
     }
     return true;
-    
 }
 }); 
 };

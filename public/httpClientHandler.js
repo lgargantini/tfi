@@ -50,14 +50,16 @@ function doMsg() {
 
 function getValues () {
 	
-	console.log(check.value);
+	console.log('Check every :'+check.value+' ms');
+	var tm = check.value ? check.value : 1000
 	if(check.value !== undefined){
 		setInterval(function () {
 				
 				httpRequest('GET','/msg','messageGet');
 				httpRequest('GET','/position','positionGet');
+				//httpRequest('GET','/upload','uploadGet');
 
-				}, 1000); 
+				}, tm); 
 		}
 }
 
@@ -88,21 +90,23 @@ function httpRequest (verb, theUrl, msgUrl) {
 	if(msgUrl !== null){
 
 		xmlHttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-		xmlHttp.onreadystatechange=function(){
+		xmlHttp.onreadystatechange = function(){
 
 		  if (xmlHttp.readyState === 4 && xmlHttp.status === 200) {
 
-		    if(xmlHttp.responseText !== undefined){
-		    	console.log('got answer xmlHttp'+xmlHttp.response);
-		    	parseResp(JSON.parse(xmlHttp.response), msgUrl);
+		    if(	xmlHttp.responseText !== undefined && 
+		    	xmlHttp.responseText !== ''&& 
+		    	xmlHttp.responseText !== "{}"){	
+			    	console.log('got answer xmlHttp'+xmlHttp.response);
+			    	parseResp(JSON.parse(xmlHttp.response), msgUrl);
 			}
 
 		  }
 
 	  	};
-	}
+	}	
 	xmlHttp.send( 'msg='+msgUrl );
-
+	
 }
 
 function parseResp (obj,msg) {
@@ -118,7 +122,9 @@ function parseResp (obj,msg) {
 		case 'positionGet':
 			parsePos(obj);
 			break;
-		
+		case 'uploadGet':
+			parseUp(obj);
+			break;
 		default:
 			break;
 	
@@ -148,6 +154,19 @@ function parsePos (obj) {
 		onMove(id, obj[id]);
 	}
 
+}
+
+function parseUp (obj) {
+		console.log(obj);
+
+		for(var id in obj){
+			if(obj[id].date >= lastMsgDate){
+				var p = logToConsole('<span class="bg-primary">'+obj[id].usr+': ' + obj[id].msg+'</span>');
+	   			p.className = 'bg-primary';
+			}
+		}
+		//update lastMsgDate
+		lastMsgDate = Date.now();
 }
 
 function doFollow () {

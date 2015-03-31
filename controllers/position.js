@@ -4,12 +4,8 @@ module.exports = function (positions) {
 
 	get:function (req,res,next) {
         if(req.session.id){
-
             res.send(positions);
-        
         }
-
-        next();
 	},
 
 	post:function (req,res,next) {

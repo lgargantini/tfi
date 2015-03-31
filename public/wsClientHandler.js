@@ -276,9 +276,23 @@ function setGuiConnected(isConnected){
   wsUri.disabled = isConnected;
   connectBut.disabled = isConnected;
 
+  UploadButtonWs.disabled = !isConnected;
+  FileBox.disabled = !isConnected;
   disconnectBut.disabled = !isConnected;
   sendMessage.disabled = !isConnected;
   sendBut.disabled = !isConnected;
+  enableCursorWs.disabled = !isConnected;
+  disableCursorWs.disabled = !isConnected;
+
+  //disable Ajax-http test
+  document.getElementById('enableCursorAjax').disabled = isConnected;
+  document.getElementById('disableCursorAjax').disabled = isConnected;
+  document.getElementById('msgAjax').disabled = isConnected;
+  document.getElementById('sendMsgAjax').disabled = isConnected;
+  document.getElementById('UploadButtonHttp').disabled = isConnected;
+  document.getElementById('UploadFileHttp').disabled = isConnected;
+  document.getElementById('getMsg').disabled = isConnected;
+
 
   if (isConnected){ labelColor = '#999999'; }
 
