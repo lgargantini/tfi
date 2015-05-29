@@ -1,7 +1,6 @@
 'use strict';
-module.exports = function (app, controller, io, positions, messages, files) {
+module.exports = function (app, controller, io, positions, messages, files, latencies) {
 var fs = require('fs');
-
 //listening
 app.get('/', controller.general.index);
 
@@ -17,9 +16,12 @@ app.post('/', controller.upload.post);
 app.get('/upload',controller.upload.get);
 
 //latency test
-app.post('/latency', controller.general.latency);
+//app.post('/latency', controller.general.latency);
+app.get('/latency', controller.latency.get);
+app.post('/latency', controller.latency.post);
+app.get('/latency/all', controller.latency.latencyAll);
 
-app.all('/logout',controller.general.logout);
+app.all('/clear',controller.general.clear);
 
 
 io.on('connection', function (socket) {
@@ -35,7 +37,7 @@ io.on('connection', function (socket) {
     })
     .on('message',function wsMsg(msg,fn) {
         console.info('recibi message');
-        //add messages for ajax client
+       
         var m = {
             date: msg.date,
             usr: socket.user,
@@ -46,6 +48,20 @@ io.on('connection', function (socket) {
         //broadcast message on ws
         socket.broadcast.emit('message', socket.user, msg );
         fn('bg-success');
+    })
+    .on('latency',function wsLat(msg) {
+        console.info('recibi latency');
+    
+        var l = {
+            date: msg.date,
+            usr: socket.user,
+            lat: msg.msg            
+        };
+        latencies[msg.date] = l;
+        console.log(latencies);
+        //broadcast message on ws
+        socket.broadcast.emit('latency', socket.user, msg );
+        //fn('bg-success');
     })
     .on('position',function wsPos(msg,fn) {
         if(checkUser(socket)){

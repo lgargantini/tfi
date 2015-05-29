@@ -101,12 +101,13 @@ function doSend(){
   var initMessage = Date.now();
   p.className = 'bg-warning';
 
-  socket.emit('message', {'msg': sendMessage.value, 'date': initMessage}, function (status) {
+  socket.emit('message', {'lat': sendMessage.value , 'date': initMessage}, function (status) {
 
     var lastMessage = Date.now();
     p.className = status;
-    document.getElementById('latency-msg').innerHTML = lastMessage - initMessage;
-
+    var lat = lastMessage - initMessage;
+    document.getElementById('latency-msg').innerHTML = lat;
+    socket.emit('latency', {'msg': lat, 'date': Date.now(), 'usr': user});
   });
   //clean fields
   sendMessage.value = '';
@@ -129,7 +130,9 @@ function doMove(ev) {
     socket.emit('position', {'x': ev.clientX, 'y': ev.clientY}, function (status) {
     lastPos = Date.now();
     document.getElementById('latency-cur').className = status;
-    document.getElementById('latency-cur').innerHTML = lastPos - initPos;
+    var lat = lastPos - initPos;
+    document.getElementById('latency-cur').innerHTML = lat;
+    socket.emit('latency', {'msg': lat, 'date': Date.now(), 'usr': user});
     });
 
 }
@@ -139,7 +142,6 @@ function doDisableCursor () {
   if(connect){
     document.removeEventListener('mousemove',doMove,false);
     document.getElementById('latency-cur').innerHTML = '';
-    //$(document).unbind('onmousemove');
   }
 
 }
@@ -180,10 +182,10 @@ function onOpen(){
   logToConsole('Connected');
   
     //listeners!!!
-
     socket.on('error', function (evt) { onError(evt);  });
     socket.on('close', function (id) { onClose(id);  });
     socket.on('message', onMessage );
+    socket.on('latency', onLatency );
     socket.on('done', function (file){ onDone(file); });
     socket.on('moreData', function  (data) { onMoreData(data); });
     socket.on('announcement',function (msg) {   onAnnouncement(msg);  });
@@ -194,6 +196,12 @@ function onOpen(){
     setGuiConnected(true);
 
   }
+
+function onLatency (from, message) {
+  if(from != user){
+    console.log('new latency -> usr :'+from+" -> "+message.msg);
+  }
+}
   
 function onClose(id){
   //should erase every cursor
@@ -255,7 +263,9 @@ function onError(evt){
 function onDone (file) {
 
   logToConsole('Video :'+file.name+' Successfully Uploaded !!');
-  document.getElementById('latency-up').innerHTML = lastUp - initUp;
+  var lat = lastUp - initUp;
+  document.getElementById('latency-up').innerHTML = lat;
+  socket.emit('latency', {'msg': lat, 'date': Date.now(), 'usr': user});
   var Content = '<button type="button" name="Upload" id="Restart" class="btn btn-success">Upload Another</button>';
   document.getElementById('UploadAreaWs').innerHTML = Content;
   document.getElementById('Restart').addEventListener('click', Refresh);
@@ -318,7 +328,10 @@ function StartUpload(){
           socket.emit('upload', { 'name' : selectedFile.name, data : evnt.target.result },function (status) {
             lastUp = Date.now();
             document.getElementById('latency-up').className = status;
-            document.getElementById('latency-up').innerHTML = lastUp - initUp;
+            var lat = lastUp - initUp;
+            document.getElementById('latency-up').innerHTML = lat;
+            socket.emit('latency', {'msg': lat, 'date': Date.now(), 'usr': user});
+
           });
         };
       //only execute at start

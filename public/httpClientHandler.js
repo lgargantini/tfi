@@ -7,8 +7,6 @@ var upAjaxBtn;
 var user;
 var msgAjax;
 var check;
-var initDate;
-var lastDate;
 
 //log
 var consoleLog = document.getElementById('box');
@@ -44,7 +42,7 @@ function doMsg() {
 
 		msgAjax.value='';
 		msgAjax.focus();
-		doLatency('latency-msg');
+		httpRequest('GET','/latency','latency-msg');
 	}
 }
 
@@ -63,26 +61,14 @@ function getValues () {
 		}
 }
 
-function doUpload () {
-	
-	doLatency('latency-up');
-
-}
-
-function doLatency (type) {
-	
-	initDate = new Date();
-	response = httpRequest('POST','/latency', null);
-	if(response !== undefined){
-		lastDate = new Date();
-		document.getElementById(type).innerHTML = lastDate - initDate;
-	}
-
+function doUpload () {	
+	httpRequest('GET','/latency','latency-up');
 }
 
 function httpRequest (verb, theUrl, msgUrl) {
 
-	var xmlHttp = null;
+	var xmlHttp;
+	var initDate = new Date();
 	console.log(theUrl);
 	xmlHttp = new XMLHttpRequest();
 	xmlHttp.open( verb, theUrl, true );
@@ -99,6 +85,14 @@ function httpRequest (verb, theUrl, msgUrl) {
 		    	xmlHttp.responseText !== "{}"){	
 			    	console.log('got answer xmlHttp'+xmlHttp.response);
 			    	parseResp(JSON.parse(xmlHttp.response), msgUrl);
+			    	
+			    	if(theUrl == '/latency'){
+				    	var lastDate = new Date();
+				    	lat = lastDate - initDate;
+			    		document.getElementById(msgUrl).innerHTML = lat;
+			    		var l = msgUrl+'&usr='+user+'&latency='+lat+'&date='+Date.now();
+			    		httpRequest('POST', '/latency', l);
+			    	}
 			}
 
 		  }
@@ -106,7 +100,7 @@ function httpRequest (verb, theUrl, msgUrl) {
 	  	};
 	}	
 	xmlHttp.send( 'msg='+msgUrl );
-	
+	 
 }
 
 function parseResp (obj,msg) {
@@ -118,7 +112,9 @@ function parseResp (obj,msg) {
 		case 'messageGet':
 			parseMsg(obj);
 			break;
-		
+		case 'latencyGet':
+			console.log('latency on parseResp');
+			break;
 		case 'positionGet':
 			parsePos(obj);
 			break;
@@ -184,7 +180,11 @@ function doFollow () {
 		if(response.responseText !== undefined){
 			positions = JSON.parse(response.responseText);
 			lastDate = new Date();
-			document.getElementById('latency-cur').innerHTML = lastDate - initDate;
+			var lat = lastDate - initDate;
+			document.getElementById('latency-cur').innerHTML = lat;
+			$.post('/latency', { type:'latency-cur', usr: user, latency: lat, date: Date.now()}, function () {
+				console.log('latency posted!');
+			});
 		}
 	});
 });

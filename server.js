@@ -11,7 +11,7 @@ var port = Number(process.env.PORT || 8000);
 var positions = {};
 var messages = {};
 var files = {};
-
+var latencies = {};
 
 //serve our code
 app.use('/',express.static(__dirname+'/public'));
@@ -23,8 +23,8 @@ app.use(session({secret: '123456789QWERTY',
                 saveUninitialized: true,
                 resave:true}));
 //listening on connections
-var control = require('./controllers/index.js')(positions, messages, files);
-var routes = require('./routes')(app,control,io,positions, messages,files);
+var control = require('./controllers/index.js')(positions, messages, files, latencies);
+var routes = require('./routes')(app,control,io,positions, messages,files, latencies);
 
 server.listen(port,function () {
     console.log('listening on -> '+port);
