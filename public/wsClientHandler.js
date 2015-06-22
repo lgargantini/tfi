@@ -101,7 +101,7 @@ function doSend(){
   var initMessage = Date.now();
   p.className = 'bg-warning';
 
-  socket.emit('message', {'lat': sendMessage.value , 'date': initMessage}, function (status) {
+  socket.emit('message', {'msg': sendMessage.value , 'date': initMessage}, function (status) {
 
     var lastMessage = Date.now();
     p.className = status;

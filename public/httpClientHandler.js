@@ -88,9 +88,9 @@ function httpRequest (verb, theUrl, msgUrl) {
 			    	
 			    	if(theUrl == '/latency'){
 				    	var lastDate = new Date();
-				    	lat = lastDate - initDate;
+				    	var lat = lastDate - initDate;
 			    		document.getElementById(msgUrl).innerHTML = lat;
-			    		var l = msgUrl+'&usr='+user+'&latency='+lat+'&date='+Date.now();
+			    		var l = msgUrl+'&usr='+user+'&msg='+lat+'&date='+Date.now();
 			    		httpRequest('POST', '/latency', l);
 			    	}
 			}
@@ -134,6 +134,7 @@ function parseMsg (obj) {
 
 	for(var id in obj){
 		if(obj[id].date >= lastMsgDate){
+			console.log('entre al if');
 			var p = logToConsole('<span class="bg-primary">'+obj[id].usr+': ' + obj[id].msg+'</span>');
    			p.className = 'bg-primary';
 		}

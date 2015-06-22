@@ -37,6 +37,7 @@ io.on('connection', function (socket) {
     })
     .on('message',function wsMsg(msg,fn) {
         console.info('recibi message');
+        console.log(msg);
        
         var m = {
             date: msg.date,

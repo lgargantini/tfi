@@ -17,7 +17,8 @@ module.exports = function (latencies) {
 		    	var l = {
 		    		date: date,
 		    		usr: req.body.usr,
-		    		lat: req.body.msg
+		    		msg: req.body.msg,
+		    		latency: req.body.latency
 		    	};
 
 		    	latencies[date] = l;
