@@ -56,7 +56,8 @@ io.on('connection', function (socket) {
         var l = {
             date: msg.date,
             usr: socket.user,
-            lat: msg.msg            
+            lat: msg.lat,
+            test: msg.msg            
         };
         latencies[msg.date] = l;
         console.log(latencies);

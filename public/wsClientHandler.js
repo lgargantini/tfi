@@ -107,7 +107,7 @@ function doSend(){
     p.className = status;
     var lat = lastMessage - initMessage;
     document.getElementById('latency-msg').innerHTML = lat;
-    socket.emit('latency', {'msg': lat, 'date': Date.now(), 'usr': user});
+    socket.emit('latency', {'test':'latency-msg' ,'lat':lat, 'date': Date.now(), 'usr': user});
   });
   //clean fields
   sendMessage.value = '';
@@ -132,7 +132,7 @@ function doMove(ev) {
     document.getElementById('latency-cur').className = status;
     var lat = lastPos - initPos;
     document.getElementById('latency-cur').innerHTML = lat;
-    socket.emit('latency', {'msg': lat, 'date': Date.now(), 'usr': user});
+    socket.emit('latency', {'test':'latency-cur', 'lat': lat, 'date': Date.now(), 'usr': user});
     });
 
 }
@@ -265,7 +265,7 @@ function onDone (file) {
   logToConsole('Video :'+file.name+' Successfully Uploaded !!');
   var lat = lastUp - initUp;
   document.getElementById('latency-up').innerHTML = lat;
-  socket.emit('latency', {'msg': lat, 'date': Date.now(), 'usr': user});
+  socket.emit('latency', {'test': 'latency-up' ,'lat': lat, 'date': Date.now(), 'usr': user});
   var Content = '<button type="button" name="Upload" id="Restart" class="btn btn-success">Upload Another</button>';
   document.getElementById('UploadAreaWs').innerHTML = Content;
   document.getElementById('Restart').addEventListener('click', Refresh);
@@ -330,7 +330,7 @@ function StartUpload(){
             document.getElementById('latency-up').className = status;
             var lat = lastUp - initUp;
             document.getElementById('latency-up').innerHTML = lat;
-            socket.emit('latency', {'msg': lat, 'date': Date.now(), 'usr': user});
+            socket.emit('latency', {'test':'latency-up','lat': lat, 'date': Date.now(), 'usr': user});
 
           });
         };

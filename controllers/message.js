@@ -17,6 +17,7 @@ module.exports = function (messages) {
 			        usr: req.body.usr,
 			        msg: req.body.msg
 			    };
+		    	console.log(m);
 			    messages[date] = m;
 			    res.send(messages);
 		    }   

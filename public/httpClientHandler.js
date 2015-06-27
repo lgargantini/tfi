@@ -61,7 +61,7 @@ function getValues () {
 		}
 }
 
-function doUpload () {	
+function doUpload () {
 	httpRequest('GET','/latency','latency-up');
 }
 
@@ -72,7 +72,7 @@ function httpRequest (verb, theUrl, msgUrl) {
 	console.log(theUrl);
 	xmlHttp = new XMLHttpRequest();
 	xmlHttp.open( verb, theUrl, true );
-	
+	var parseVar;
 	if(msgUrl !== null){
 
 		xmlHttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
@@ -83,14 +83,15 @@ function httpRequest (verb, theUrl, msgUrl) {
 		    if(	xmlHttp.responseText !== undefined && 
 		    	xmlHttp.responseText !== ''&& 
 		    	xmlHttp.responseText !== "{}"){	
-			    	console.log('got answer xmlHttp'+xmlHttp.response);
-			    	parseResp(JSON.parse(xmlHttp.response), msgUrl);
+			    	console.log('got answer xmlHttp'+xmlHttp.response);			    	
+			    	parseResp(JSON.parse(xmlHttp.response), theUrl);
 			    	
-			    	if(theUrl == '/latency'){
+			    	if(theUrl === '/latency' && verb === 'GET' && typeof msgUrl !== 'undefined'){
 				    	var lastDate = new Date();
 				    	var lat = lastDate - initDate;
+			    		
 			    		document.getElementById(msgUrl).innerHTML = lat;
-			    		var l = msgUrl+'&usr='+user+'&msg='+lat+'&date='+Date.now();
+			    		var l = msgUrl+'&lat='+lat+'&usr='+user+'&date='+Date.now();
 			    		httpRequest('POST', '/latency', l);
 			    	}
 			}
@@ -103,22 +104,22 @@ function httpRequest (verb, theUrl, msgUrl) {
 	 
 }
 
-function parseResp (obj,msg) {
+function parseResp (obj, msg) {
 
 	console.log('estoy en parseResp y tengo'+msg);
 	
 	switch(msg){
 
-		case 'messageGet':
+		case '/msg':
 			parseMsg(obj);
 			break;
-		case 'latencyGet':
+		case '/latency':
 			console.log('latency on parseResp');
 			break;
-		case 'positionGet':
+		case '/position':
 			parsePos(obj);
 			break;
-		case 'uploadGet':
+		case '/upload':
 			parseUp(obj);
 			break;
 		default:
@@ -183,7 +184,7 @@ function doFollow () {
 			lastDate = new Date();
 			var lat = lastDate - initDate;
 			document.getElementById('latency-cur').innerHTML = lat;
-			$.post('/latency', { type:'latency-cur', usr: user, latency: lat, date: Date.now()}, function () {
+			$.post('/latency', { type:'latency-cur', usr: user, msg: lat, date: Date.now()}, function () {
 				console.log('latency posted!');
 			});
 		}
