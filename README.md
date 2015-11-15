@@ -1,5 +1,5 @@
 # Trabajo Final Integrador
-## Sistemas actuales de Intercambio de Información
+## Protocolos actuales para intercambio de información en la Web
 ### Autor: Gargantini Leandro
 
 #Setup
@@ -10,7 +10,9 @@
 ``` cd tfi ```
 3. Instalar paquetes asociados al proyecto
 ``` npm install ```
-( requiere node js + npm instalado en pc )
+( requiere node js + npm instalado )
+4. Instalar gulp en modo global
+``` sudo npm install -g gulp ```
 
 ### Ubuntu
 ``` 
@@ -24,15 +26,10 @@ Seguir instrucciones en https://nodejs.org/
 
 # Iniciar server
 
-## Modo Developer
-``` gulp develop ```
+* Modo Developer 
+```gulp develop ```    ( requiere gulp instalado en modo global )
 
-( requiere gulp instalado de modo global )
-
-### Ubuntu / OSx
-``` npm install -g gulp ```
-
-## Modo Normal Nativo de Node ( via NPM )
+* Modo Normal Nativo de Node ( via NPM ) 
 ``` npm start ```
 
 # Iniciar cliente
