@@ -32,9 +32,11 @@ disconnectBut.onclick = doDisconnect;
 
 //MSG 
 sendMessage = document.getElementById('msg');
+sendMessage.onblur = doSend;
 
 sendBut = document.getElementById('sendMsgWs');
 sendBut.onclick = doSend;
+
 
 //LOG
 consoleLog = document.getElementById('box');
@@ -95,7 +97,9 @@ setGuiConnected(false);
   
 //MSG SECTION
 function doSend(){
-
+  if(sendMessage.value == ""){
+    return false;
+  }
   var p = logToConsole(sendMessage.value);
   //timestamp
   var initMessage = Date.now();
@@ -207,6 +211,7 @@ function onClose(id){
   //should erase every cursor
   var cursor = document.getElementById('cursor-'+id);
   document.body.removeChild(cursor);
+  doDisconnect();
 
 }
 

@@ -21,7 +21,6 @@
     "gulp-mocha": "~1.1.1",
     "gulp-nodemon": "~1.0.4",
     "gulp-util": "~3.0.1",
-    "gulp-jshint": "~1.8.5",
     "should": "~4.0.4",
     "socket.io-client": "~1.1.0",
     "websocket-bench": "0.0.6"

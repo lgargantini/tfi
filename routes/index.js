@@ -25,7 +25,7 @@ app.all('/clear',controller.general.clear);
 
 
 io.on('connection', function (socket) {
-    console.log('new!');
+    console.info('new!');
     socket
     .on('join',function wsJoin(name) {
         
@@ -37,8 +37,8 @@ io.on('connection', function (socket) {
     })
     .on('message',function wsMsg(msg,fn) {
         console.info('recibi message');
-        console.log(msg);
-       
+        console.info(msg);
+        
         var m = {
             date: msg.date,
             usr: socket.user,
@@ -49,18 +49,18 @@ io.on('connection', function (socket) {
         //broadcast message on ws
         socket.broadcast.emit('message', socket.user, msg );
         fn('bg-success');
+        
     })
     .on('latency',function wsLat(msg) {
         console.info('recibi latency');
-    
         var l = {
             date: msg.date,
             usr: socket.user,
             lat: msg.lat,
-            test: msg.msg            
+            test: msg.test            
         };
         latencies[msg.date] = l;
-        console.log(latencies);
+        console.info(latencies);
         //broadcast message on ws
         socket.broadcast.emit('latency', socket.user, msg );
         //fn('bg-success');
@@ -96,16 +96,16 @@ io.on('connection', function (socket) {
 
         try{
             //type of stat
-            console.log('__dirname'+__dirname);
+            console.info('__dirname'+__dirname);
             fs.stat(__dirname+'/Temp/',function (err,stats) {
                 if(stats === undefined){
-                    console.log('creando carpeta Temp');
+                    console.info('creando carpeta Temp');
                     fs.mkdir(__dirname+'/Temp/', '0775');
                 }
             });
             fs.stat(__dirname+'/Video/',function (err,stats) {
                 if(stats === undefined){
-                    console.log('creando carpeta Video');
+                    console.info('creando carpeta Video');
                     fs.mkdir(__dirname+'/Video/', '0775');
                 }
             });
@@ -134,8 +134,8 @@ io.on('connection', function (socket) {
     .on('upload', function wsUpload(data, fn){
         
         console.info('recibi upload');
-        console.log(data.name);
-        console.log(data.data.length);
+        console.info(data);
+
         var name = data.name;
         files[name].downloaded += data.data.length;
         files[name].data += data.data;
@@ -158,8 +158,8 @@ io.on('connection', function (socket) {
         }
         //If the Data Buffer reaches 10MB
         else if(files[name].data.length > 10485760){
-            console.log(files[name].handler);
-            console.log(files[name].data.length);
+            console.info(files[name].handler);
+            console.info(files[name].data.length);
             fs.write(files[name].handler, files[name].data, null, 'binary', function(){
                 files[name].data = ''; //Reset The Buffer
                 var place = files[name].downloaded / 524288;
@@ -176,12 +176,8 @@ io.on('connection', function (socket) {
 
 //only for WS
 function checkUser (socket) {
-    
-    if(socket.user === 'undefined' || socket.user === undefined){
-        socket.disconnect();
-        return false;
-    }
-    return true;
+    return socket.user === 'undefined' || socket.user === undefined;
 }
+
 }); 
 };

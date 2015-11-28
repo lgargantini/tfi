@@ -9,7 +9,9 @@ module.exports = function (messages) {
 		},
 		post:function (req,res,next) {
 		    //get msg from user
-		    console.log('/msg');
+		    console.log('/msg + body');
+			console.log(req.body);
+		    
 		    if(req.session.id){
 			    var date = req.body.date;
 			    var m = {
