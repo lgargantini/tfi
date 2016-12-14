@@ -1,13 +1,13 @@
 <!--doctype html-->
 <html>
 <head>
-  <title>WebSocket echo test</title>
+  <title> TFI test</title>
   <link rel="stylesheet" type="text/css" href="css/test.css">
   <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
 </head>
 <body>
   <div class="container">
-  <h1> Sistemas de Interconexion - TFI</h1>
+  <h1> Protocolos de Transferencia de Informacion - TFI</h1>
     <div class='row'>
       <div class='col-md-4'>
         <div class=".form-control">
@@ -19,7 +19,6 @@
           <h4>
           <span id='latency'>Latency Check Test </span> <br />
           Latency msg: <span id="latency-msg"></span>ms <br /> 
-          Latency upload: <span id="latency-up"></span>ms <br /> 
           Latency cursor: <span id="latency-cur"></span>ms
 
           </h4>
@@ -45,11 +44,6 @@
             <button type='button' class='btn btn-success' id="sendMsgWs" >Send!</button>
           </div>
 <br>
-          <span id='UploadAreaWs'>
-              <strong>WS Upload : </strong><br>
-              <input type="file" id="FileBox">
-              <button  type='button' id='UploadButtonWs' class='btn btn-success'>Upload</button>
-          </span>
 <br><br>
             <strong>Cursor Follow Test :</strong><br>
             <input type='button' id='enableCursorWs'> Cursor follow (WS) </input>  <input type='button' id='disableCursorWs'> Disable cursor</input>
@@ -62,14 +56,7 @@
              <input type="text" id="msgAjax" placeholder='message'>
              <button type='button' class='btn btn-success' id="sendMsgAjax">Send!</button>
 <br><br>
-        <div id='UploadAreaAjax'>
-          <strong>Http Upload : </strong>
-          <form action="/" enctype="multipart/form-data" method="post">
-            <input type='file' name='upload' id='UploadFileHttp' >
-            <input type='submit' id='UploadButtonHttp' value='upload!' class='btn btn-success'>
-          </form>
-        </div>
-
+        
             <strong>Cursor Follow Test :</strong><br>
             <input type='button' id='enableCursorAjax'> Cursor follow (Ajax)</input>
             <input type='button' id='disableCursorAjax'> Disable cursor</input>
@@ -78,7 +65,7 @@
              <input type='text' id='getMsg' placeholder='get every ... (ms)'>
       </div>
   </div>
-  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
   <script type='text/javascript' src='wsClientHandler.js'></script>
   <script type="text/javascript" src='httpClientHandler.js'></script>
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
