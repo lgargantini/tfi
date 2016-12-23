@@ -12,7 +12,6 @@ app.get('/position',controller.position.get);
 app.post('/position',controller.position.post);
 
 //latency test
-//app.post('/latency', controller.general.latency);
 app.get('/latency', controller.latency.get);
 app.post('/latency', controller.latency.post);
 app.get('/latency/all', controller.latency.latencyAll);

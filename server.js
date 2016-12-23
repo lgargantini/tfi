@@ -6,7 +6,7 @@ var options = {
 	key:fs.readFileSync(__dirname + '/node-http/server.key'),
 	cert:fs.readFileSync(__dirname + '/node-http/server.crt'),
 	spdy:{
-		protocols:['h2','spdy/3.1','http/1.1'],
+		protocols:['h2','spdy/3.1'],
 		plain:false,
 		'x-forwarded-for':true,
 		connection:{
@@ -46,7 +46,7 @@ spdy
 .listen(port2,function() {
 	console.log('http2 listening on -> '+port2);
 });
-/*
+
 server.listen(port,function () {
     console.log('listening on -> '+port);
-});*/
+});
