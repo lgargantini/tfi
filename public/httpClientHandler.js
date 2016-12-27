@@ -1,5 +1,4 @@
 'use strict';
-//var sending = false,
 var response;
 var positions;
 var lastMsgDate;
@@ -17,6 +16,7 @@ document.getElementById('disableCursorAjax').onclick = doDisable;
 //MSG AJAX
 msgAjax = document.getElementById('msgAjax');
 document.getElementById('sendMsgAjax').onclick = doMsg;
+msgAjax.onkeypress = doKeyMsg;
 
 check = document.getElementById('getMsg');
 check.onchange = getValues;
@@ -43,6 +43,15 @@ function doMsg() {
 		}
 	}
 }
+
+function doKeyMsg(e) {
+    
+  var key = e.which;
+    if(key == 13){
+      doMsg();
+    }
+  
+  }
 
 function getValues () {
 	

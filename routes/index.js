@@ -43,13 +43,11 @@ io.on('connection', function (socket) {
 
         //broadcast message on ws
         socket.broadcast.emit('message', socket.user, msg );
-        fn('bg-success');
+        fn('bg-primary');
         
     })
     .on('latency',function wsLat(msg) {
         console.info('recibi latency');
-        console.info(msg);
-        console.info(latencies);
         var l = {
             date: msg.date,
             usr: socket.user,
@@ -90,5 +88,5 @@ function checkUser (socket) {
     return socket.user === 'undefined' || socket.user === undefined;
 }
 
-}); 
+});
 };

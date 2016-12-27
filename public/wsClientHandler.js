@@ -33,9 +33,11 @@ function start(){
   //MSG 
   sendMessage = document.getElementById('msg');
   sendMessage.onblur = doSend;
+  sendMessage.onkeypress = doKeySend;
 
   sendBut = document.getElementById('sendMsgWs');
   sendBut.onclick = doSend;
+  sendBut.onkeypress = doKeySend;
 
 
   //LOG
@@ -51,6 +53,15 @@ function start(){
   setGuiConnected(false);
     
 }
+
+  function doKeySend(e) {
+    
+  var key = e.which;
+    if(key == 13){
+      doSend();
+    }
+  
+  }
 
   function doConnect(){
 
@@ -87,7 +98,7 @@ function doSend(){
   if(sendMessage.value == ""){
     return false;
   }
-  var p = logToConsole(sendMessage.value);
+  var p = logToConsole('<span>'+user+': ' + sendMessage.value+'</span>');
   //timestamp
   var initMessage = Date.now();
   p.className = 'bg-warning';
@@ -95,6 +106,7 @@ function doSend(){
   socket.emit('message', {'msg': sendMessage.value , 'date': initMessage}, function (status) {
 
     var lastMessage = Date.now();
+    console.log(status);
     p.className = status;
     var lat = lastMessage - initMessage;
     document.getElementById('latency-msg').innerHTML = lat;
