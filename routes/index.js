@@ -1,5 +1,5 @@
 'use strict';
-module.exports = function (app, controller, io, positions, messages, files, latencies) {
+module.exports = function (app, controller, io, positions, messages, latencies) {
 var fs = require('fs');
 //listening
 app.get('/', controller.general.index);
@@ -48,6 +48,8 @@ io.on('connection', function (socket) {
     })
     .on('latency',function wsLat(msg) {
         console.info('recibi latency');
+        console.info(msg);
+        console.info(latencies);
         var l = {
             date: msg.date,
             usr: socket.user,

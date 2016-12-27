@@ -54,11 +54,6 @@ function start(){
 
   function doConnect(){
 
-    if (window.MozWebSocket){
-      logToConsole('<span style="color: red;"><strong>Info:</strong> This browser supports WebSocket using the MozWebSocket constructor</span>');
-      window.WebSocket = window.MozWebSocket;
-    }
-
     if (!window.WebSocket){
       logToConsole('<span style="color: red;"><strong>Error:</strong> This browser does not have support for WebSocket</span>');
       return;

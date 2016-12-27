@@ -38,6 +38,9 @@ function doMsg() {
 		msgAjax.value='';
 		msgAjax.focus();
 		httpRequest('GET','/latency','latency-msg');
+		if(!check.value){
+			getValues();
+		}
 	}
 }
 
@@ -120,7 +123,6 @@ function parseMsg (obj) {
 
 	for(var id in obj){
 		if(obj[id].date >= lastMsgDate){
-			console.log('entre al if');
 			var p = logToConsole('<span class="bg-primary">'+obj[id].usr+': ' + obj[id].msg+'</span>');
    			p.className = 'bg-primary';
 		}
