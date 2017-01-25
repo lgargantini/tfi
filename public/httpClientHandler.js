@@ -1,9 +1,7 @@
 'use strict';
-//var sending = false,
 var response;
 var positions;
 var lastMsgDate;
-var upAjaxBtn; 
 var user;
 var msgAjax;
 var check;
@@ -18,13 +16,10 @@ document.getElementById('disableCursorAjax').onclick = doDisable;
 //MSG AJAX
 msgAjax = document.getElementById('msgAjax');
 document.getElementById('sendMsgAjax').onclick = doMsg;
+msgAjax.onkeypress = doKeyMsg;
 
 check = document.getElementById('getMsg');
 check.onchange = getValues;
-
-//UPLOAD AJAX
-upAjaxBtn = document.getElementById('UploadButtonHttp');
-upAjaxBtn.onclick = doUpload;
 
 function loginUser () {
 	user = prompt('What is your name?');
@@ -43,8 +38,20 @@ function doMsg() {
 		msgAjax.value='';
 		msgAjax.focus();
 		httpRequest('GET','/latency','latency-msg');
+		if(!check.value){
+			getValues();
+		}
 	}
 }
+
+function doKeyMsg(e) {
+    
+  var key = e.which;
+    if(key == 13){
+      doMsg();
+    }
+  
+  }
 
 function getValues () {
 	
@@ -52,17 +59,10 @@ function getValues () {
 	var tm = check.value ? check.value : 1000
 	if(check.value !== undefined){
 		setInterval(function () {
-				
 				httpRequest('GET','/msg','messageGet');
 				httpRequest('GET','/position','positionGet');
-				//httpRequest('GET','/upload','uploadGet');
-
 				}, tm); 
-		}
-}
-
-function doUpload () {
-	httpRequest('GET','/latency','latency-up');
+	}
 }
 
 function httpRequest (verb, theUrl, msgUrl) {
@@ -119,9 +119,6 @@ function parseResp (obj, msg) {
 		case '/position':
 			parsePos(obj);
 			break;
-		case '/upload':
-			parseUp(obj);
-			break;
 		default:
 			break;
 	
@@ -135,7 +132,6 @@ function parseMsg (obj) {
 
 	for(var id in obj){
 		if(obj[id].date >= lastMsgDate){
-			console.log('entre al if');
 			var p = logToConsole('<span class="bg-primary">'+obj[id].usr+': ' + obj[id].msg+'</span>');
    			p.className = 'bg-primary';
 		}
@@ -154,19 +150,6 @@ function parsePos (obj) {
 
 }
 
-function parseUp (obj) {
-		console.log(obj);
-
-		for(var id in obj){
-			if(obj[id].date >= lastMsgDate){
-				var p = logToConsole('<span class="bg-primary">'+obj[id].usr+': ' + obj[id].msg+'</span>');
-	   			p.className = 'bg-primary';
-			}
-		}
-		//update lastMsgDate
-		lastMsgDate = Date.now();
-}
-
 function doFollow () {
 
 	$(document).mousemove(function (ev) {
@@ -176,12 +159,12 @@ function doFollow () {
 		loginUser();
 	}
 
-	initDate = new Date();
+	var initDate = new Date();
 	response = $.post('/position', { x: ev.clientX, y: ev.clientY , usr: user},
 									function(){
 		if(response.responseText !== undefined){
 			positions = JSON.parse(response.responseText);
-			lastDate = new Date();
+			var lastDate = new Date();
 			var lat = lastDate - initDate;
 			document.getElementById('latency-cur').innerHTML = lat;
 			$.post('/latency', { type:'latency-cur', usr: user, msg: lat, date: Date.now()}, function () {

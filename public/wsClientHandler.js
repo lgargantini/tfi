@@ -20,52 +20,50 @@ var connect;
 
 function start(){
 
-//EVENTS HANDLERS!!!
+  //EVENTS HANDLERS!!!
 
-wsUri = document.getElementById('wsUri');
+  wsUri = document.getElementById('wsUri');
 
-connectBut = document.getElementById('connect');
-connectBut.onclick = doConnect;
+  connectBut = document.getElementById('connect');
+  connectBut.onclick = doConnect;
 
-disconnectBut = document.getElementById('disconnect');
-disconnectBut.onclick = doDisconnect;
+  disconnectBut = document.getElementById('disconnect');
+  disconnectBut.onclick = doDisconnect;
 
-//MSG 
-sendMessage = document.getElementById('msg');
-sendMessage.onblur = doSend;
+  //MSG 
+  sendMessage = document.getElementById('msg');
+  sendMessage.onblur = doSend;
+  sendMessage.onkeypress = doKeySend;
 
-sendBut = document.getElementById('sendMsgWs');
-sendBut.onclick = doSend;
+  sendBut = document.getElementById('sendMsgWs');
+  sendBut.onclick = doSend;
+  sendBut.onkeypress = doKeySend;
 
 
-//LOG
-consoleLog = document.getElementById('box');
+  //LOG
+  consoleLog = document.getElementById('box');
 
-//CURSOR WS
-cursor = document.getElementById('enableCursorWs');
-cursor.onclick = doCursor;
+  //CURSOR WS
+  cursor = document.getElementById('enableCursorWs');
+  cursor.onclick = doCursor;
 
-cursorDisable = document.getElementById('disableCursorWs');
-cursorDisable.onclick = doDisableCursor;
+  cursorDisable = document.getElementById('disableCursorWs');
+  cursorDisable.onclick = doDisableCursor;
 
-setGuiConnected(false);
+  setGuiConnected(false);
+    
+}
 
-//These are the relevant HTML5 objects that we are going to use 
-    if(window.File && window.FileReader){
-      document.getElementById('UploadButtonWs').addEventListener('click', StartUpload);  
-      document.getElementById('FileBox').addEventListener('change', FileChosen);
-    }else{
-      document.getElementById('UploadAreaWs').innerHTML = 'Your Browser Doesnt Support The File API Please Update Your Browser';
+  function doKeySend(e) {
+    
+  var key = e.which;
+    if(key == 13){
+      doSend();
     }
-
+  
   }
 
   function doConnect(){
-
-    if (window.MozWebSocket){
-      logToConsole('<span style="color: red;"><strong>Info:</strong> This browser supports WebSocket using the MozWebSocket constructor</span>');
-      window.WebSocket = window.MozWebSocket;
-    }
 
     if (!window.WebSocket){
       logToConsole('<span style="color: red;"><strong>Error:</strong> This browser does not have support for WebSocket</span>');
@@ -100,7 +98,7 @@ function doSend(){
   if(sendMessage.value == ""){
     return false;
   }
-  var p = logToConsole(sendMessage.value);
+  var p = logToConsole('<span>'+user+': ' + sendMessage.value+'</span>');
   //timestamp
   var initMessage = Date.now();
   p.className = 'bg-warning';
@@ -108,6 +106,7 @@ function doSend(){
   socket.emit('message', {'msg': sendMessage.value , 'date': initMessage}, function (status) {
 
     var lastMessage = Date.now();
+    console.log(status);
     p.className = status;
     var lat = lastMessage - initMessage;
     document.getElementById('latency-msg').innerHTML = lat;
@@ -265,18 +264,7 @@ function onError(evt){
 
 }
 
-function onDone (file) {
 
-  logToConsole('Video :'+file.name+' Successfully Uploaded !!');
-  var lat = lastUp - initUp;
-  document.getElementById('latency-up').innerHTML = lat;
-  socket.emit('latency', {'test': 'latency-up' ,'lat': lat, 'date': Date.now(), 'usr': user});
-  var Content = '<button type="button" name="Upload" id="Restart" class="btn btn-success">Upload Another</button>';
-  document.getElementById('UploadAreaWs').innerHTML = Content;
-  document.getElementById('Restart').addEventListener('click', Refresh);
-  document.getElementById('Restart').style.left = '20px';
-
-}
 
 function onAnnouncement (msg) {
 
@@ -291,8 +279,6 @@ function setGuiConnected(isConnected){
   wsUri.disabled = isConnected;
   connectBut.disabled = isConnected;
 
-  UploadButtonWs.disabled = !isConnected;
-  FileBox.disabled = !isConnected;
   disconnectBut.disabled = !isConnected;
   sendMessage.disabled = !isConnected;
   sendBut.disabled = !isConnected;
@@ -304,77 +290,10 @@ function setGuiConnected(isConnected){
   document.getElementById('disableCursorAjax').disabled = isConnected;
   document.getElementById('msgAjax').disabled = isConnected;
   document.getElementById('sendMsgAjax').disabled = isConnected;
-  document.getElementById('UploadButtonHttp').disabled = isConnected;
-  document.getElementById('UploadFileHttp').disabled = isConnected;
   document.getElementById('getMsg').disabled = isConnected;
-
 
   if (isConnected){ labelColor = '#999999'; }
 
-}
-
-  //UPLOAD SECTION
-function FileChosen(evnt) {
-
-    selectedFile = evnt.target.files[0];
-
-}
-
-function StartUpload(){
- 
-    if(document.getElementById('FileBox').value !== ''){
-        FReader = new FileReader();
-        initUp = Date.now();
-        var content = '<div id="ProgressContainer"><div id="ProgressBar"></div></div><span id="percent">0%</span>';
-        content += '<span id="Uploaded"> - <span id="MB">0</span>/' + Math.round(selectedFile.size / 1048576) + 'MB</span>';
-        document.getElementById('UploadAreaWs').innerHTML = content;
-        //onload chunk of data, set name
-        FReader.onload = function(evnt){
-          socket.emit('upload', { 'name' : selectedFile.name, data : evnt.target.result },function (status) {
-            lastUp = Date.now();
-            document.getElementById('latency-up').className = status;
-            var lat = lastUp - initUp;
-            document.getElementById('latency-up').innerHTML = lat;
-            socket.emit('latency', {'test':'latency-up','lat': lat, 'date': Date.now(), 'usr': user});
-
-          });
-        };
-      //only execute at start
-      socket.emit('start', { 'name' : selectedFile.name, 'size' : selectedFile.size });
-    
-    }else{
-      alert('Please Select A File');
-    }
-  }
-
-function onMoreData(data){
-    updateBar(data.percent);
-    //The Next Blocks Starting Position
-    var place = data.place * 524288; 
-    var newFile; //The Variable that will hold the new Block of Data
-
-    //chunk current file
-    if(selectedFile.slice){
-      newFile = selectedFile.slice(place, place + Math.min(524288, (selectedFile.size-place)));
-    }else if (selectedFile.webkitSlice){
-      newFile = selectedFile.webkitSlice(place, place + Math.min(524288, (selectedFile.size-place)));
-    }else if(selectedFile.mozSlice){
-      newFile = selectedFile.mozSlice(place, place + Math.min(524288, (selectedFile.size-place)));
-    }else{
-      throw new Error('falla slice!!');
-    }
-    FReader.readAsBinaryString(newFile);
-}
-
-function updateBar(percent){
-    document.getElementById('ProgressBar').style.width = percent + '%';
-    document.getElementById('percent').innerHTML = (Math.round(percent*100)/100) + '%';
-    var MBDone = Math.round(((percent/100.0) * selectedFile.size) / 1048576);
-    document.getElementById('MB').innerHTML = MBDone;
-}
-
-function Refresh(){
-    location.reload(true);
 }
 
 window.addEventListener('load', start, false);
