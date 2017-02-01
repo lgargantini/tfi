@@ -1,5 +1,5 @@
 'use strict';
-module.exports = function (app, controller, io, positions, messages, latencies) {
+module.exports = function (app, controller, io,ios, positions, messages, latencies) {
 var fs = require('fs');
 //listening
 app.get('/', controller.general.index);
@@ -17,9 +17,14 @@ app.post('/latency', controller.latency.post);
 app.get('/latency/all', controller.latency.latencyAll);
 
 app.all('/clear',controller.general.clear);
+app.get('/push',controller.general.push);
 
 
-io.on('connection', function (socket) {
+io.on('connection', socketHandling );
+ios.on('connection', socketHandling );
+
+
+function socketHandling(socket) {
     console.info('new!');
     socket
     .on('join',function wsJoin(name) {
@@ -88,5 +93,7 @@ function checkUser (socket) {
     return socket.user === 'undefined' || socket.user === undefined;
 }
 
-});
+};
+
+
 };

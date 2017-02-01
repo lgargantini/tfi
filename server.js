@@ -19,6 +19,7 @@ var options = {
 var server = require('http').Server(app);
 var spdy = require('spdy').createServer(options,app);
 var io = require('socket.io')(server);
+var ios = require('socket.io')(spdy);
 var session = require('express-session');
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
@@ -28,6 +29,12 @@ var port2 = Number(process.env.PORT2 || 5000);
 var positions = {};
 var messages = {};
 var latencies = {};
+
+var engines = require('consolidate');
+
+app.set('views', __dirname + '/views');
+app.set('view engine', 'html');
+app.engine('html', require('ejs').renderFile);
 
 //serve our code
 app.use('/',express.static(__dirname+'/public'));
@@ -40,7 +47,7 @@ app.use(session({secret: '123456789QWERTY',
                 resave:true}));
 //listening on connections
 var control = require('./controllers/index.js')(positions, messages, latencies);
-var routes = require('./routes')(app,control,io,positions, messages, latencies);
+var routes = require('./routes')(app,control,io,ios,positions, messages, latencies);
 
 spdy
 .listen(port2,function() {
