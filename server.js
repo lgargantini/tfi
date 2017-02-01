@@ -30,8 +30,6 @@ var positions = {};
 var messages = {};
 var latencies = {};
 
-var engines = require('consolidate');
-
 app.set('views', __dirname + '/views');
 app.set('view engine', 'html');
 app.engine('html', require('ejs').renderFile);

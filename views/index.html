@@ -1,0 +1,75 @@
+<!--doctype html-->
+<html>
+<head>
+  <title> TFI test</title>
+  <link rel="stylesheet" type="text/css" href="css/test.css">
+  <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+</head>
+<body>
+  <div class="container">
+  <h1> Protocolos de Transferencia de Informacion - TFI</h1>
+    <div class='row'>
+      <div class='col-md-4'>
+        <div class=".form-control">
+          <strong>Server:</strong><input type='text' id='wsUri' placeholder='http://server:port'>
+          <br><br>
+          <button type='button' class='btn btn-success' id='connect' >Connect</button>
+          <button type='button' class='btn btn-danger' id='disconnect' >Disconnect</button><br>
+
+          <h4>
+          <span id='latency'>Latency Check Test </span> <br />
+          Latency msg: <span id="latency-msg"></span>ms <br /> 
+          Latency cursor: <span id="latency-cur"></span>ms
+
+          </h4>
+        </div>
+      </div>
+
+      <div class="col-md-8">
+        <div id='cont' style="border:4px solid black;width:600px;height:200px;overflow:scroll;" >
+          <table class='table' id='box'>
+          </table>
+        </div><br>
+
+        <div id='mydiv'></div>
+
+      </div>
+    </div>
+    <div class='row'>
+      <div class='col-md-6'>
+      <h3>WEBSOCKET TEST</h3>
+          <div id='chat'>
+            <strong>Message Test:</strong>
+            <input type="text" id="msg" placeholder='message'>
+            <button type='button' class='btn btn-success' id="sendMsgWs" >Send!</button>
+          </div>
+<br>
+<br><br>
+            <strong>Cursor Follow Test :</strong><br>
+            <input type='button' id='enableCursorWs'> Cursor follow (WS) </input>  <input type='button' id='disableCursorWs'> Disable cursor</input>
+          
+      </div>
+      <div class='col-md-6'>
+      <h3>AJAX-HTTP TEST</h3>
+            <strong>Message Test :</strong>
+            
+             <input type="text" id="msgAjax" placeholder='message'>
+             <button type='button' class='btn btn-success' id="sendMsgAjax">Send!</button>
+<br><br>
+        
+            <strong>Cursor Follow Test :</strong><br>
+            <input type='button' id='enableCursorAjax'> Cursor follow (Ajax)</input>
+            <input type='button' id='disableCursorAjax'> Disable cursor</input>
+            <br><br>
+            <strong>GET loop (for msgs and positions):</strong>
+             <input type='text' id='getMsg' placeholder='get every ... (ms)'>
+      </div>
+  </div>
+  <script src="/socket.io/socket.io.js"></script>
+  <script type='text/javascript' src='wsClientHandler.js'></script>
+  <script type="text/javascript" src='httpClientHandler.js'></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+  <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+</body>
+
+</html>
