@@ -9,6 +9,7 @@
     "express-session": "~1.8.2",
     "formidable": "~1.0.15",
     "socket.io": "^1.7.2",
+    "socket.io-client": "^1.1.0",
     "spdy": "^3.4.4",
     "util": "~0.10.3"
   },
