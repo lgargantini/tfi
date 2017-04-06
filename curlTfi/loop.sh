@@ -1,10 +1,10 @@
 echo "setting headers"
-echo "size_header, size_request, time_namelookup, time_connect, time_appconnect, time_pretransfer, time_redirect, time_starttransfer, time_total" > resHttp10.csv
-echo "size_header, size_request, time_namelookup, time_connect, time_appconnect, time_pretransfer, time_redirect, time_starttransfer, time_total" > resHttps10.csv
-echo "size_header, size_request, time_namelookup, time_connect, time_appconnect, time_pretransfer, time_redirect, time_starttransfer, time_total" > resHttp100.csv
-echo "size_header, size_request, time_namelookup, time_connect, time_appconnect, time_pretransfer, time_redirect, time_starttransfer, time_total" > resHttps100.csv
-echo "size_header, size_request, time_namelookup, time_connect, time_appconnect, time_pretransfer, time_redirect, time_starttransfer, time_total" > resHttp200.csv
-echo "size_header, size_request, time_namelookup, time_connect, time_appconnect, time_pretransfer, time_redirect, time_starttransfer, time_total" > resHttps200.csv
+echo "size_header size_request time_namelookup time_connect time_appconnect time_pretransfer time_redirect time_starttransfer time_total" > resHttp10.csv
+echo "size_header size_request time_namelookup time_connect time_appconnect time_pretransfer time_redirect time_starttransfer time_total" > resHttps10.csv
+echo "size_header size_request time_namelookup time_connect time_appconnect time_pretransfer time_redirect time_starttransfer time_total" > resHttp100.csv
+echo "size_header size_request time_namelookup time_connect time_appconnect time_pretransfer time_redirect time_starttransfer time_total" > resHttps100.csv
+echo "size_header size_request time_namelookup time_connect time_appconnect time_pretransfer time_redirect time_starttransfer time_total" > resHttp200.csv
+echo "size_header size_request time_namelookup time_connect time_appconnect time_pretransfer time_redirect time_starttransfer time_total" > resHttps200.csv
 echo "done!"
 
 echo "curl loop 10 ..."
