@@ -4,6 +4,7 @@
 		"package.json",
 		"test/**",
 		"node_modules/**/node_modules",
-		"Gruntfile.js"
+		"Gruntfile.js",
+		"curlTfi/**.csv"
 	]
 }
