@@ -3,8 +3,9 @@ var express = require('express');
 var app = express();
 var fs = require('fs');
 var options = {
-	key:fs.readFileSync(__dirname + '/node-http/server.key'),
-	cert:fs.readFileSync(__dirname + '/node-http/server.crt'),
+	key:fs.readFileSync(__dirname + '/node-http/privkey.pem'),
+	cert:fs.readFileSync(__dirname + '/node-http/fullchain.pem'),
+	ca:fs.readFileSync(__dirname + '/node-http/chain.pem'),
 	spdy:{
 		protocols:['h2','spdy/3.1'],
 		plain:false,
@@ -16,7 +17,7 @@ var options = {
 	}
 };
 
-var server = require('http').Server(app);
+var server = require('https').createServer(options,app);
 var spdy = require('spdy').createServer(options,app);
 var io = require('socket.io')(server);
 var ios = require('socket.io')(spdy);
@@ -25,7 +26,7 @@ var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 
 var port = Number(process.env.PORT || 8000);
-var port2 = Number(process.env.PORT2 || 5000);
+var port2 = Number(process.env.PORT2 || 443);
 var positions = {};
 var messages = {};
 var latencies = {};
@@ -49,9 +50,9 @@ var routes = require('./routes')(app,control,io,ios,positions, messages, latenci
 
 spdy
 .listen(port2,function() {
-	console.log('http2 listening on -> '+port2);
+	console.log('https h2 listening on -> '+port2);
 });
 
 server.listen(port,function () {
-    console.log('listening on -> '+port);
+    console.log('https h1 listening on -> '+port);
 });
