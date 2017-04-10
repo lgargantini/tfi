@@ -28,6 +28,15 @@ var general = {
 		    stream.end('alert("hello from push stream!");');
 		}
 	    res.render('index');
+	},
+	css:function (req,res) {
+		res.render('css');
+	},
+	multicss:function (req,res) {
+		res.render('multicss');
+	},
+	images:function (req,res) {
+		res.render('images');
 	}
 };
 

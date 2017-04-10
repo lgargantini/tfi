@@ -4,6 +4,10 @@ var fs = require('fs');
 //listening
 app.get('/', controller.general.index);
 
+app.get('/imagestest', controller.general.images);
+app.get('/csstest', controller.general.css);
+app.get('/multicsstest', controller.general.multicss);
+
 app.get('/msg',controller.message.get);
 app.post('/msg',controller.message.post);
 
