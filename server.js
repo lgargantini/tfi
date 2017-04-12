@@ -16,8 +16,13 @@ var options = {
 		}
 	}
 };
+var optH1 = {
+	key:fs.readFileSync(__dirname + '/node-http/privkey.pem'),
+        cert:fs.readFileSync(__dirname + '/node-http/fullchain.pem'),
+        ca:fs.readFileSync(__dirname + '/node-http/chain.pem')
+};
 
-var server = require('https').createServer(options,app);
+var server = require('https').createServer(optH1,app);
 var spdy = require('spdy').createServer(options,app);
 var io = require('socket.io')(server);
 var ios = require('socket.io')(spdy);
