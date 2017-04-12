@@ -5,6 +5,7 @@ var fs = require('fs');
 app.get('/', controller.general.index);
 
 app.get('/imagestest', controller.general.images);
+app.get('/progressiveimagestest', controller.general.progressiveimages);
 app.get('/csstest', controller.general.css);
 app.get('/multicsstest', controller.general.multicss);
 

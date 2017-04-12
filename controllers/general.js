@@ -37,6 +37,9 @@ var general = {
 	},
 	images:function (req,res) {
 		res.render('images');
+	},
+	progressiveimages: function (req,res) {
+		res.render('progressiveimages');
 	}
 };
 
