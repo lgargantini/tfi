@@ -2,7 +2,7 @@
 var express = require('express');
 var app = express();
 var fs = require('fs');
-var options = {
+var optH2 = {
 	key:fs.readFileSync(__dirname + '/node-http/privkey.pem'),
 	cert:fs.readFileSync(__dirname + '/node-http/fullchain.pem'),
 	ca:fs.readFileSync(__dirname + '/node-http/chain.pem'),
@@ -16,22 +16,27 @@ var options = {
 		}
 	}
 };
-var optH1 = {
+var optH1s = {
 	key:fs.readFileSync(__dirname + '/node-http/privkey.pem'),
         cert:fs.readFileSync(__dirname + '/node-http/fullchain.pem'),
         ca:fs.readFileSync(__dirname + '/node-http/chain.pem')
 };
 
-var server = require('https').createServer(optH1,app);
-var spdy = require('spdy').createServer(options,app);
-var io = require('socket.io')(server);
-var ios = require('socket.io')(spdy);
+var h1 = require('http').Server(app);
+var h1s = require('https').createServer(optH1s,app);
+var h2 = require('spdy').createServer(optH2,app);
+
+var io = require('socket.io')(h1);
+var ios = require('socket.io')(h1s);
+
 var session = require('express-session');
 var bodyParser = require('body-parser');
 var cookieParser = require('cookie-parser');
 
 var port = Number(process.env.PORT || 8000);
 var port2 = Number(process.env.PORT2 || 443);
+var port3 = Number(process.env.PORT3 || 5000);
+
 var positions = {};
 var messages = {};
 var latencies = {};
@@ -53,11 +58,15 @@ app.use(session({secret: '123456789QWERTY',
 var control = require('./controllers/index.js')(positions, messages, latencies);
 var routes = require('./routes')(app,control,io,ios,positions, messages, latencies);
 
-spdy
+h1s.listen(port,function () {
+    console.log('https h1 listening on -> '+port);
+});
+
+h2
 .listen(port2,function() {
 	console.log('https h2 listening on -> '+port2);
 });
 
-server.listen(port,function () {
-    console.log('https h1 listening on -> '+port);
+h1.listen(port3, function() {
+	console.log('http h1 listening on ->'+port3);
 });
